@@ -30,7 +30,7 @@ Tweak inner shadows, tint, frost blur, noise distortion and swap out the backgro
 
 ## 🛠 Usage
 
-1. Open `index.html` in **Chrome on macOS** (untested on Safari).
+1. Open `index.html`.
 2. Use the on-screen sliders and color pickers to adjust the effect.
 
 Or simply visit the **Live Demo** link above.
