@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Liquid Glass</title>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <style>
+        :root {
+            /* Inner shadow */
+            --shadow-offset: 0;
+            --shadow-blur: 20px;
+            --shadow-spread: -5px;
+            --shadow-color: rgba(255, 255, 255, 0.7);
+
+            /* Painted glass */
+            --tint-color: 255, 255, 255;
+            --tint-opacity: 0.4;
+
+            /* Background frost */
+            --frost-blur: 2px;
+
+            /* SVG noise/distortion */
+            --noise-frequency: 0.008;
+            --distortion-strength: 77;
+
+            /* Outer shadow blur */
+            --outer-shadow-blur: 24px;
+        }
+
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfDB8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
+            font-family: sans-serif;
+            font-weight: 300;
+            position: relative;
+            max-width: 100vw;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+
+        #controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 280px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #controls h2 {
+            margin: 8px 0 4px;
+            font-size: 16px;
+        }
+
+        #controls label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 4px 0;
+        }
+
+        #controls input[type=range] {
+            width: 140px;
+        }
+
+        #controls input[type=color],
+        #controls input[type=text] {
+            border: none;
+            padding: 0;
+            width: 120px;
+            height: 24px;
+            background: #fff;
+            color: #000;
+            font-size: 12px;
+        }
+
+        .glassDiv {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            border-radius: 28px;
+            cursor: move;
+            isolation: isolate;
+            touch-action: none;
+            /* enable pointer dragging on touch */
+            box-shadow: 0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.2);
+        }
+
+        .glassDiv::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            border-radius: 28px;
+            box-shadow:
+                inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color);
+            background-color: rgba(var(--tint-color), var(--tint-opacity));
+        }
+
+        .glassDiv::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: 28px;
+            backdrop-filter: blur(var(--frost-blur));
+            filter: url(#glass-distortion);
+            isolation: isolate;
+            -webkit-backdrop-filter: blur(var(--frost-blur));
+            -webkit-filter: url("#glass-distortion");
+        }
+
+        @media (max-width: 600px) {
+            .glassDiv {
+                top: 30%;
+                width: 250px;
+                height: 120px;
+            }
+
+            #controls {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                max-width: 94%;
+                border-radius: 0;
+            }
+
+            #controls input[type=range],
+            #controls input[type=text] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="controls">
+        <h2>Inner Shadow</h2>
+        <label>Color: <input type="color" id="shadow-color" value="#ffffff"
+                style="width: 30px; height: 30px; border-radius: 4px;" /></label>
+        <label>Blur: <input type="range" id="shadow-blur" min="0" max="20" value="20" />px</label>
+        <label>Spread: <input type="range" id="shadow-spread" min="-10" max="10" value="-5" />px</label>
+
+        <h2>Glass Tint</h2>
+        <label>Tint Color: <input type="color" id="tint-color" value="#ffffff"
+                style="width: 30px; height: 30px; border-radius: 4px;" /></label>
+        <label>Opacity: <input type="range" id="tint-opacity" min="0" max="100" value="4" />%</label>
+
+        <h2>Frost Blur</h2>
+        <label>Blur Radius: <input type="range" id="frost-blur" min="0" max="30" value="2" />px</label>
+
+        <h2>Noise Distortion</h2>
+        <label>Noise Freq: <input type="range" id="noise-frequency" min="0" max="0.02" step="0.001"
+                value="0.008" /></label>
+        <label>Strength: <input type="range" id="distortion-strength" min="0" max="200" value="77" /></label>
+
+        <!-- <h2>Outer Shadow</h2>
+        <label>Blur: <input type="range" id="outer-shadow-blur" min="0" max="50" value="10" />px</label> -->
+
+        <h2>Background Image</h2>
+        <label>URL: <input type="text" id="bg-url" placeholder="https://..." /></label>
+    </div>
+
+    <div class="glassDiv"></div>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute; overflow:hidden">
+        <defs>
+            <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
+                    yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <script>
+        (function () {
+            const root = document.documentElement;
+            function setVar(name, val) { root.style.setProperty(name, val); }
+
+            function updateSVG() {
+                const freq = parseFloat(document.getElementById('noise-frequency').value);
+                const scale = document.getElementById('distortion-strength').value;
+                document.querySelector('feTurbulence').setAttribute('baseFrequency', `${freq} ${freq}`);
+                document.querySelector('feDisplacementMap').setAttribute('scale', scale);
+            }
+
+            function updateBackground() {
+                const url = document.getElementById('bg-url').value;
+                if (url) {
+                    document.body.style.background = `url('${url}') center/cover no-repeat`;
+                }
+            }
+
+            const controls = {
+                'shadow-color': ['--shadow-color', v => v],
+                'shadow-blur': ['--shadow-blur', v => v + 'px'],
+                'shadow-spread': ['--shadow-spread', v => v + 'px'],
+                'tint-color': ['--tint-color', v => v.match(/\w\w/g).map(h => parseInt(h, 16)).join(',')],
+                'tint-opacity': ['--tint-opacity', v => v / 100],
+                'frost-blur': ['--frost-blur', v => v + 'px'],
+                // 'outer-shadow-blur': ['--outer-shadow-blur', v => v + 'px']
+            };
+
+            function updateAll() {
+                Object.entries(controls).forEach(([id, [cssVar, fn]]) => {
+                    const el = document.getElementById(id);
+                    if (el) setVar(cssVar, fn(el.value));
+                    console.log(`id: ${id} | value:${el.value}`)
+                });
+
+                updateSVG();
+                updateBackground();
+            }
+
+            document.querySelectorAll('#controls input').forEach(i =>
+                i.addEventListener('input', updateAll)
+            );
+            updateAll();
+        })();
+
+        // ——— fully draggable in X and Y via Pointer Events ———
+        dragElement(document.querySelector('.glassDiv'));
+        function dragElement(elmnt) {
+            let startX = 0, startY = 0;
+
+            const onPointerDown = e => {
+                e.preventDefault();
+                const rect = elmnt.getBoundingClientRect();
+                elmnt.style.position = 'absolute';
+                elmnt.style.top = rect.top + 'px';
+                elmnt.style.left = rect.left + 'px';
+                elmnt.style.transform = 'none';
+
+                startX = e.clientX;
+                startY = e.clientY;
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp, { once: true });
+            };
+
+            const onPointerMove = e => {
+                e.preventDefault();
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                startX = e.clientX;
+                startY = e.clientY;
+                elmnt.style.left = (elmnt.offsetLeft + dx) + 'px';
+                elmnt.style.top = (elmnt.offsetTop + dy) + 'px';
+            };
+
+            const onPointerUp = () => {
+                document.removeEventListener('pointermove', onPointerMove);
+            };
+
+            elmnt.addEventListener('pointerdown', onPointerDown);
+        }
+    </script>
+</body>
+
+</html>

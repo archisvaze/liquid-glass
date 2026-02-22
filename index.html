@@ -1,116 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Liquid Glass</title>
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
+    <title>Liquid Glass — Physics-Based Refraction</title>
     <style>
         :root {
-            /* Inner shadow */
-            --shadow-offset: 0;
+            --tint-color: 255, 255, 255;
+            --tint-opacity: 0.06;
             --shadow-blur: 20px;
             --shadow-spread: -5px;
-            --shadow-color: rgba(255, 255, 255, 0.7);
-
-            /* Painted glass */
-            --tint-color: 255, 255, 255;
-            --tint-opacity: 0.4;
-
-            /* Background frost */
-            --frost-blur: 2px;
-
-            /* SVG noise/distortion */
-            --noise-frequency: 0.008;
-            --distortion-strength: 77;
-
-            /* Outer shadow blur */
+            --shadow-color: rgba(255, 255, 255, 0.45);
             --outer-shadow-blur: 24px;
+            --glass-radius: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            margin: 0;
             width: 100vw;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background:
-                url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfDB8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
-            font-family: sans-serif;
+            background: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
             font-weight: 300;
             position: relative;
-            max-width: 100vw;
-            max-height: 100vh;
             overflow: hidden;
+            color: #fff;
         }
 
+        /* ── Controls Panel ── */
         #controls {
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            max-width: 280px;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            max-width: 300px;
             max-height: 90vh;
             overflow-y: auto;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         #controls h2 {
-            margin: 8px 0 4px;
-            font-size: 16px;
+            margin: 14px 0 6px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #controls h2:first-child {
+            margin-top: 0;
         }
 
         #controls label {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 4px 0;
-        }
-
-        #controls input[type=range] {
-            width: 140px;
-        }
-
-        #controls input[type=color],
-        #controls input[type=text] {
-            border: none;
-            padding: 0;
-            width: 120px;
-            height: 24px;
-            background: #fff;
-            color: #000;
+            margin: 5px 0;
             font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #controls input[type='range'] {
+            width: 110px;
+            accent-color: #8b7cf7;
+        }
+
+        #controls .value-display {
+            font-family: 'SF Mono', ui-monospace, monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        #controls select {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        #controls input[type='text'] {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #fff;
+            font-size: 12px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        #controls input[type='color'] {
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
         }
 
         .glassDiv {
             position: absolute;
             width: 300px;
             height: 200px;
-            border-radius: 28px;
+            border-radius: var(--glass-radius);
             cursor: move;
             isolation: isolate;
             touch-action: none;
-            /* enable pointer dragging on touch */
-            box-shadow: 0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 4px var(--outer-shadow-blur) rgba(0, 0, 0, 0.18);
         }
 
         .glassDiv::before {
             content: '';
             position: absolute;
             inset: 0;
-            z-index: 0;
-            border-radius: 28px;
-            box-shadow:
-                inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color);
+            z-index: 1;
+            border-radius: inherit;
+            box-shadow: inset 0 0 var(--shadow-blur) var(--shadow-spread) var(--shadow-color);
             background-color: rgba(var(--tint-color), var(--tint-opacity));
+            pointer-events: none;
         }
 
         .glassDiv::after {
@@ -118,19 +148,72 @@
             position: absolute;
             inset: 0;
             z-index: -1;
-            border-radius: 28px;
-            backdrop-filter: blur(var(--frost-blur));
-            filter: url(#glass-distortion);
+            border-radius: inherit;
+            backdrop-filter: url(#liquid-glass-filter);
+            -webkit-backdrop-filter: url(#liquid-glass-filter);
             isolation: isolate;
-            -webkit-backdrop-filter: blur(var(--frost-blur));
-            -webkit-filter: url("#glass-distortion");
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            z-index: 10;
+            opacity: 0.3;
+            transition: opacity 0.15s;
+        }
+
+        .resize-handle:hover {
+            opacity: 0.7;
+        }
+
+        .resize-handle::before,
+        .resize-handle::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 1px;
+        }
+
+        .resize-handle::before {
+            width: 10px;
+            height: 2px;
+            bottom: 6px;
+            right: 4px;
+            transform: rotate(-45deg);
+        }
+
+        .resize-handle::after {
+            width: 6px;
+            height: 2px;
+            bottom: 4px;
+            right: 2px;
+            transform: rotate(-45deg);
+        }
+
+        .chrome-note {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 14px;
+            border-radius: 50px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            z-index: 50;
+            white-space: nowrap;
         }
 
         @media (max-width: 600px) {
             .glassDiv {
-                top: 30%;
-                width: 250px;
-                height: 120px;
+                width: 220px;
+                height: 140px;
             }
 
             #controls {
@@ -138,141 +221,457 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                max-width: 94%;
-                border-radius: 0;
-            }
-
-            #controls input[type=range],
-            #controls input[type=text] {
-                width: 100%;
+                max-width: 100%;
+                border-radius: 14px 14px 0 0;
+                max-height: 50vh;
             }
         }
     </style>
 </head>
 
 <body>
-
     <div id="controls">
+        <h2>Glass Shape</h2>
+        <label>Width:
+            <input type="range" id="glass-width" min="100" max="700" value="300" />
+            <span class="value-display" id="glass-width-val">300</span>
+        </label>
+        <label>Height:
+            <input type="range" id="glass-height" min="80" max="500" value="200" />
+            <span class="value-display" id="glass-height-val">200</span>
+        </label>
+        <label>Border Radius:
+            <input type="range" id="border-radius" min="4" max="150" value="28" />
+            <span class="value-display" id="border-radius-val">28</span>
+        </label>
+
+        <h2>Surface Profile</h2>
+        <label>Shape:
+            <select id="surface-fn">
+                <option value="convex_squircle" selected>
+                    Convex Squircle
+                </option>
+                <option value="convex_circle">Convex Circle</option>
+                <option value="concave">Concave</option>
+                <option value="lip">Lip</option>
+            </select>
+        </label>
+
+        <h2>Refraction</h2>
+        <label>Glass Thickness:
+            <input type="range" id="glass-thickness" min="10" max="200" value="80" />
+            <span class="value-display" id="glass-thickness-val">80</span>
+        </label>
+        <label>Bezel Width:
+            <input type="range" id="bezel-width" min="2" max="60" value="20" />
+            <span class="value-display" id="bezel-width-val">20</span>
+        </label>
+        <label>Refractive Index:
+            <input type="range" id="refractive-index" min="1.0" max="3.0" step="0.05" value="1.5" />
+            <span class="value-display" id="refractive-index-val">1.50</span>
+        </label>
+        <label>Scale Ratio:
+            <input type="range" id="scale-ratio" min="0.0" max="2.0" step="0.05" value="1.0" />
+            <span class="value-display" id="scale-ratio-val">1.00</span>
+        </label>
+
+        <h2>Appearance</h2>
+        <label>Blur:
+            <input type="range" id="blur-amount" min="0" max="8" step="0.1" value="0.3" />
+            <span class="value-display" id="blur-amount-val">0.3</span>
+        </label>
+        <label>Specular Opacity:
+            <input type="range" id="specular-opacity" min="0" max="1" step="0.05" value="0.5" />
+            <span class="value-display" id="specular-opacity-val">0.50</span>
+        </label>
+        <label>Specular Saturation:
+            <input type="range" id="specular-saturation" min="0" max="12" step="1" value="4" />
+            <span class="value-display" id="specular-saturation-val">4</span>
+        </label>
+
         <h2>Inner Shadow</h2>
-        <label>Color: <input type="color" id="shadow-color" value="#ffffff"
-                style="width: 30px; height: 30px; border-radius: 4px;" /></label>
-        <label>Blur: <input type="range" id="shadow-blur" min="0" max="20" value="20" />px</label>
-        <label>Spread: <input type="range" id="shadow-spread" min="-10" max="10" value="-5" />px</label>
+        <label>Color:
+            <input type="color" id="shadow-color" value="#ffffff" />
+        </label>
+        <label>Blur:
+            <input type="range" id="shadow-blur" min="0" max="40" value="20" />
+            <span class="value-display" id="shadow-blur-val">20</span>
+        </label>
+        <label>Spread:
+            <input type="range" id="shadow-spread" min="-15" max="10" value="-5" />
+            <span class="value-display" id="shadow-spread-val">-5</span>
+        </label>
 
         <h2>Glass Tint</h2>
-        <label>Tint Color: <input type="color" id="tint-color" value="#ffffff"
-                style="width: 30px; height: 30px; border-radius: 4px;" /></label>
-        <label>Opacity: <input type="range" id="tint-opacity" min="0" max="100" value="4" />%</label>
+        <label>Tint Color:
+            <input type="color" id="tint-color" value="#ffffff" />
+        </label>
+        <label>Tint Opacity:
+            <input type="range" id="tint-opacity" min="0" max="40" step="1" value="6" />
+            <span class="value-display" id="tint-opacity-val">6%</span>
+        </label>
 
-        <h2>Frost Blur</h2>
-        <label>Blur Radius: <input type="range" id="frost-blur" min="0" max="30" value="2" />px</label>
+        <h2>Outer Shadow</h2>
+        <label>Blur:
+            <input type="range" id="outer-shadow-blur" min="0" max="50" value="24" />
+            <span class="value-display" id="outer-shadow-blur-val">24</span>
+        </label>
 
-        <h2>Noise Distortion</h2>
-        <label>Noise Freq: <input type="range" id="noise-frequency" min="0" max="0.02" step="0.001"
-                value="0.008" /></label>
-        <label>Strength: <input type="range" id="distortion-strength" min="0" max="200" value="77" /></label>
-
-        <!-- <h2>Outer Shadow</h2>
-        <label>Blur: <input type="range" id="outer-shadow-blur" min="0" max="50" value="10" />px</label> -->
-
-        <h2>Background Image</h2>
-        <label>URL: <input type="text" id="bg-url" placeholder="https://..." /></label>
+        <h2>Background</h2>
+        <input type="text" id="bg-url" placeholder="Paste image URL…" />
     </div>
 
-    <div class="glassDiv"></div>
+    <div class="glassDiv" id="glass">
+        <div class="resize-handle" id="resize-handle"></div>
+    </div>
 
-    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute; overflow:hidden">
-        <defs>
-            <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
-                <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
-                    yChannelSelector="G" />
-            </filter>
-        </defs>
+    <div class="chrome-note">⚠ SVG backdrop-filter is Chrome / Chromium only</div>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
+        color-interpolation-filters="sRGB">
+        <defs id="svg-defs"></defs>
     </svg>
 
     <script>
-        (function () {
-            const root = document.documentElement;
-            function setVar(name, val) { root.style.setProperty(name, val); }
+        const SURFACE_FNS = {
+            convex_squircle: (x) => Math.pow(1 - Math.pow(1 - x, 4), 0.25),
+            convex_circle: (x) => Math.sqrt(1 - (1 - x) * (1 - x)),
+            concave: (x) => 1 - Math.sqrt(1 - (1 - x) * (1 - x)),
+            lip: (x) => {
+                const convex = Math.pow(1 - Math.pow(1 - Math.min(x * 2, 1), 4), 0.25);
+                const concave = 1 - Math.sqrt(1 - (1 - x) * (1 - x)) + 0.1;
+                const t = 6 * x ** 5 - 15 * x ** 4 + 10 * x ** 3;
+                return convex * (1 - t) + concave * t;
+            },
+        };
 
-            function updateSVG() {
-                const freq = parseFloat(document.getElementById('noise-frequency').value);
-                const scale = document.getElementById('distortion-strength').value;
-                document.querySelector('feTurbulence').setAttribute('baseFrequency', `${freq} ${freq}`);
-                document.querySelector('feDisplacementMap').setAttribute('scale', scale);
+        function calculateRefractionProfile(glassThickness, bezelWidth, heightFn, ior, samples) {
+            samples = samples || 128;
+            const eta = 1 / ior;
+            function refract(nx, ny) {
+                const dot = ny;
+                const k = 1 - eta * eta * (1 - dot * dot);
+                if (k < 0) return null;
+                const sq = Math.sqrt(k);
+                return [-(eta * dot + sq) * nx, eta - (eta * dot + sq) * ny];
+            }
+            const profile = new Float64Array(samples);
+            for (let i = 0; i < samples; i++) {
+                const x = i / samples;
+                const y = heightFn(x);
+                const dx = x < 1 ? 0.0001 : -0.0001;
+                const y2 = heightFn(x + dx);
+                const deriv = (y2 - y) / dx;
+                const mag = Math.sqrt(deriv * deriv + 1);
+                const ref = refract(-deriv / mag, -1 / mag);
+                if (!ref) {
+                    profile[i] = 0;
+                    continue;
+                }
+                profile[i] = ref[0] * ((y * bezelWidth + glassThickness) / ref[1]);
+            }
+            return profile;
+        }
+
+        function generateDisplacementMap(w, h, radius, bezelWidth, profile, maxDisp) {
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext('2d');
+            const img = ctx.createImageData(w, h);
+            const d = img.data;
+            for (let i = 0; i < d.length; i += 4) {
+                d[i] = 128;
+                d[i + 1] = 128;
+                d[i + 2] = 0;
+                d[i + 3] = 255;
             }
 
-            function updateBackground() {
-                const url = document.getElementById('bg-url').value;
-                if (url) {
-                    document.body.style.background = `url('${url}') center/cover no-repeat`;
+            const r = radius,
+                rSq = r * r,
+                r1Sq = (r + 1) ** 2;
+            const rBSq = Math.max(r - bezelWidth, 0) ** 2;
+            const wB = w - r * 2,
+                hB = h - r * 2,
+                S = profile.length;
+
+            for (let y1 = 0; y1 < h; y1++) {
+                for (let x1 = 0; x1 < w; x1++) {
+                    const x = x1 < r ? x1 - r : x1 >= w - r ? x1 - r - wB : 0;
+                    const y = y1 < r ? y1 - r : y1 >= h - r ? y1 - r - hB : 0;
+                    const dSq = x * x + y * y;
+                    if (dSq > r1Sq || dSq < rBSq) continue;
+                    const dist = Math.sqrt(dSq);
+                    const fromSide = r - dist;
+                    const op = dSq < rSq ? 1 : 1 - (dist - Math.sqrt(rSq)) / (Math.sqrt(r1Sq) - Math.sqrt(rSq));
+                    if (op <= 0 || dist === 0) continue;
+                    const cos = x / dist,
+                        sin = y / dist;
+                    const bi = Math.min(((fromSide / bezelWidth) * S) | 0, S - 1);
+                    const disp = profile[bi] || 0;
+                    const dX = (-cos * disp) / maxDisp,
+                        dY = (-sin * disp) / maxDisp;
+                    const idx = (y1 * w + x1) * 4;
+                    d[idx] = (128 + dX * 127 * op + 0.5) | 0;
+                    d[idx + 1] = (128 + dY * 127 * op + 0.5) | 0;
                 }
             }
+            ctx.putImageData(img, 0, 0);
+            return c.toDataURL();
+        }
 
-            const controls = {
-                'shadow-color': ['--shadow-color', v => v],
-                'shadow-blur': ['--shadow-blur', v => v + 'px'],
-                'shadow-spread': ['--shadow-spread', v => v + 'px'],
-                'tint-color': ['--tint-color', v => v.match(/\w\w/g).map(h => parseInt(h, 16)).join(',')],
-                'tint-opacity': ['--tint-opacity', v => v / 100],
-                'frost-blur': ['--frost-blur', v => v + 'px'],
-                // 'outer-shadow-blur': ['--outer-shadow-blur', v => v + 'px']
-            };
+        function generateSpecularMap(w, h, radius, bezelWidth, angle) {
+            angle = angle != null ? angle : Math.PI / 3;
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext('2d');
+            const img = ctx.createImageData(w, h);
+            const d = img.data;
+            d.fill(0);
 
-            function updateAll() {
-                Object.entries(controls).forEach(([id, [cssVar, fn]]) => {
-                    const el = document.getElementById(id);
-                    if (el) setVar(cssVar, fn(el.value));
-                    console.log(`id: ${id} | value:${el.value}`)
-                });
+            const r = radius,
+                rSq = r * r,
+                r1Sq = (r + 1) ** 2;
+            const rBSq = Math.max(r - bezelWidth, 0) ** 2;
+            const wB = w - r * 2,
+                hB = h - r * 2;
+            const sv = [Math.cos(angle), Math.sin(angle)];
 
-                updateSVG();
-                updateBackground();
+            for (let y1 = 0; y1 < h; y1++) {
+                for (let x1 = 0; x1 < w; x1++) {
+                    const x = x1 < r ? x1 - r : x1 >= w - r ? x1 - r - wB : 0;
+                    const y = y1 < r ? y1 - r : y1 >= h - r ? y1 - r - hB : 0;
+                    const dSq = x * x + y * y;
+                    if (dSq > r1Sq || dSq < rBSq) continue;
+                    const dist = Math.sqrt(dSq);
+                    const fromSide = r - dist;
+                    const op = dSq < rSq ? 1 : 1 - (dist - Math.sqrt(rSq)) / (Math.sqrt(r1Sq) - Math.sqrt(rSq));
+                    if (op <= 0 || dist === 0) continue;
+                    const cos = x / dist,
+                        sin = -y / dist;
+                    const dot = Math.abs(cos * sv[0] + sin * sv[1]);
+                    const edge = Math.sqrt(Math.max(0, 1 - (1 - fromSide) ** 2));
+                    const coeff = dot * edge;
+                    const col = (255 * coeff) | 0;
+                    const alpha = (col * coeff * op) | 0;
+                    const idx = (y1 * w + x1) * 4;
+                    d[idx] = col;
+                    d[idx + 1] = col;
+                    d[idx + 2] = col;
+                    d[idx + 3] = alpha;
+                }
             }
+            ctx.putImageData(img, 0, 0);
+            return c.toDataURL();
+        }
 
-            document.querySelectorAll('#controls input').forEach(i =>
-                i.addEventListener('input', updateAll)
-            );
-            updateAll();
+        const glass = document.getElementById('glass');
+
+        function rebuildFilter() {
+            const w = glass.offsetWidth,
+                h = glass.offsetHeight;
+            if (w < 2 || h < 2) return;
+
+            const surfaceKey = document.getElementById('surface-fn').value;
+            const glassThick = +document.getElementById('glass-thickness').value;
+            const bezelW = +document.getElementById('bezel-width').value;
+            const ior = +document.getElementById('refractive-index').value;
+            const scaleRatio = +document.getElementById('scale-ratio').value;
+            const blurAmt = +document.getElementById('blur-amount').value;
+            const specOpacity = +document.getElementById('specular-opacity').value;
+            const specSat = +document.getElementById('specular-saturation').value;
+            const radius = +document.getElementById('border-radius').value;
+
+            const heightFn = SURFACE_FNS[surfaceKey];
+            const clampedBezel = Math.min(bezelW, radius - 1, Math.min(w, h) / 2 - 1);
+
+            const profile = calculateRefractionProfile(glassThick, clampedBezel, heightFn, ior, 128);
+            const maxDisp = Math.max(...Array.from(profile).map(Math.abs)) || 1;
+            const dispUrl = generateDisplacementMap(w, h, radius, clampedBezel, profile, maxDisp);
+            const specUrl = generateSpecularMap(w, h, radius, clampedBezel * 2.5);
+            const scale = maxDisp * scaleRatio;
+
+            document.getElementById('svg-defs').innerHTML = `
+        <filter id="liquid-glass-filter" x="0%" y="0%" width="100%" height="100%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="${blurAmt}" result="blurred_source" />
+            <feImage href="${dispUrl}" x="0" y="0" width="${w}" height="${h}" result="disp_map" />
+            <feDisplacementMap in="blurred_source" in2="disp_map"
+                scale="${scale}" xChannelSelector="R" yChannelSelector="G"
+                result="displaced" />
+            <feColorMatrix in="displaced" type="saturate" values="${specSat}" result="displaced_sat" />
+            <feImage href="${specUrl}" x="0" y="0" width="${w}" height="${h}" result="spec_layer" />
+            <feComposite in="displaced_sat" in2="spec_layer" operator="in" result="spec_masked" />
+            <feComponentTransfer in="spec_layer" result="spec_faded">
+                <feFuncA type="linear" slope="${specOpacity}" />
+            </feComponentTransfer>
+            <feBlend in="spec_masked" in2="displaced" mode="normal" result="with_sat" />
+            <feBlend in="spec_faded" in2="with_sat" mode="normal" />
+        </filter>
+    `;
+        }
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+
+        function updateCSS() {
+            const root = document.documentElement.style;
+            const gs = glass.style;
+
+            // Size
+            const w = +document.getElementById('glass-width').value;
+            const h = +document.getElementById('glass-height').value;
+            const br = +document.getElementById('border-radius').value;
+            gs.width = w + 'px';
+            gs.height = h + 'px';
+            root.setProperty('--glass-radius', br + 'px');
+
+            // Inner shadow
+            const shColor = document.getElementById('shadow-color').value;
+            const shBlur = +document.getElementById('shadow-blur').value;
+            const shSpread = +document.getElementById('shadow-spread').value;
+            root.setProperty('--shadow-color', shColor);
+            root.setProperty('--shadow-blur', shBlur + 'px');
+            root.setProperty('--shadow-spread', shSpread + 'px');
+
+            // Tint
+            const tintColor = document.getElementById('tint-color').value;
+            const tintOp = +document.getElementById('tint-opacity').value;
+            root.setProperty('--tint-color', hexToRgb(tintColor));
+            root.setProperty('--tint-opacity', (tintOp / 100).toFixed(3));
+
+            // Outer shadow
+            const outerBlur = +document.getElementById('outer-shadow-blur').value;
+            root.setProperty('--outer-shadow-blur', outerBlur + 'px');
+        }
+
+        const FILTER_CTRLS = [
+            ['glass-thickness', (v) => Math.round(v)],
+            ['bezel-width', (v) => Math.round(v)],
+            ['refractive-index', (v) => (+v).toFixed(2)],
+            ['scale-ratio', (v) => (+v).toFixed(2)],
+            ['blur-amount', (v) => (+v).toFixed(1)],
+            ['specular-opacity', (v) => (+v).toFixed(2)],
+            ['specular-saturation', (v) => Math.round(v)],
+        ];
+
+        const CSS_CTRLS = [
+            ['glass-width', (v) => Math.round(v)],
+            ['glass-height', (v) => Math.round(v)],
+            ['border-radius', (v) => Math.round(v)],
+            ['shadow-blur', (v) => Math.round(v)],
+            ['shadow-spread', (v) => Math.round(v)],
+            ['tint-opacity', (v) => Math.round(v) + '%'],
+            ['outer-shadow-blur', (v) => Math.round(v)],
+        ];
+
+        const REBUILD_ON_CSS = new Set(['glass-width', 'glass-height', 'border-radius']);
+
+        let timer;
+        function scheduleRebuild() {
+            clearTimeout(timer);
+            timer = setTimeout(rebuildFilter, 30);
+        }
+
+        FILTER_CTRLS.forEach(([id, fmt]) => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => {
+                document.getElementById(id + '-val').textContent = fmt(el.value);
+                scheduleRebuild();
+            });
+        });
+
+        CSS_CTRLS.forEach(([id, fmt]) => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => {
+                const valEl = document.getElementById(id + '-val');
+                if (valEl) valEl.textContent = fmt(el.value);
+                updateCSS();
+                if (REBUILD_ON_CSS.has(id)) scheduleRebuild();
+            });
+        });
+
+        ['shadow-color', 'tint-color'].forEach((id) => {
+            document.getElementById(id).addEventListener('input', updateCSS);
+        });
+
+        document.getElementById('surface-fn').addEventListener('change', scheduleRebuild);
+
+        document.getElementById('bg-url').addEventListener('change', function () {
+            if (this.value) document.body.style.background = `url('${this.value}') center/cover no-repeat`;
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCSS();
+            requestAnimationFrame(() => requestAnimationFrame(rebuildFilter));
+        });
+        window.addEventListener('resize', () => {
+            clearTimeout(timer);
+            timer = setTimeout(rebuildFilter, 150);
+        });
+
+        // Center glass on load
+        glass.style.left = innerWidth / 2 - 150 + 'px';
+        glass.style.top = innerHeight / 2 - 100 + 'px';
+
+        // Drag
+        (function () {
+            let sx, sy;
+            glass.addEventListener('pointerdown', (e) => {
+                if (e.target.id === 'resize-handle') return; // don't drag when resizing
+                e.preventDefault();
+                sx = e.clientX;
+                sy = e.clientY;
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', () => document.removeEventListener('pointermove', onMove), { once: true });
+            });
+            function onMove(e) {
+                e.preventDefault();
+                glass.style.left = glass.offsetLeft + e.clientX - sx + 'px';
+                glass.style.top = glass.offsetTop + e.clientY - sy + 'px';
+                sx = e.clientX;
+                sy = e.clientY;
+            }
         })();
 
-        // ——— fully draggable in X and Y via Pointer Events ———
-        dragElement(document.querySelector('.glassDiv'));
-        function dragElement(elmnt) {
-            let startX = 0, startY = 0;
+        // Resize handle
+        (function () {
+            const handle = document.getElementById('resize-handle');
+            let sx, sy, sw, sh;
 
-            const onPointerDown = e => {
+            handle.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
-                const rect = elmnt.getBoundingClientRect();
-                elmnt.style.position = 'absolute';
-                elmnt.style.top = rect.top + 'px';
-                elmnt.style.left = rect.left + 'px';
-                elmnt.style.transform = 'none';
+                e.stopPropagation();
+                sx = e.clientX;
+                sy = e.clientY;
+                sw = glass.offsetWidth;
+                sh = glass.offsetHeight;
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', onUp, { once: true });
+            });
 
-                startX = e.clientX;
-                startY = e.clientY;
-                document.addEventListener('pointermove', onPointerMove);
-                document.addEventListener('pointerup', onPointerUp, { once: true });
-            };
-
-            const onPointerMove = e => {
+            function onMove(e) {
                 e.preventDefault();
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                startX = e.clientX;
-                startY = e.clientY;
-                elmnt.style.left = (elmnt.offsetLeft + dx) + 'px';
-                elmnt.style.top = (elmnt.offsetTop + dy) + 'px';
-            };
+                const nw = Math.max(80, sw + e.clientX - sx);
+                const nh = Math.max(60, sh + e.clientY - sy);
+                glass.style.width = nw + 'px';
+                glass.style.height = nh + 'px';
+                // Sync sliders
+                document.getElementById('glass-width').value = nw;
+                document.getElementById('glass-width-val').textContent = Math.round(nw);
+                document.getElementById('glass-height').value = nh;
+                document.getElementById('glass-height-val').textContent = Math.round(nh);
+                scheduleRebuild();
+            }
 
-            const onPointerUp = () => {
-                document.removeEventListener('pointermove', onPointerMove);
-            };
-
-            elmnt.addEventListener('pointerdown', onPointerDown);
-        }
+            function onUp() {
+                document.removeEventListener('pointermove', onMove);
+            }
+        })();
     </script>
 </body>
 
