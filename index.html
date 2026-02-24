@@ -13,7 +13,7 @@
             --shadow-spread: -5px;
             --shadow-color: rgba(255, 255, 255, 0.45);
             --outer-shadow-blur: 24px;
-            --glass-radius: 28px;
+            --glass-radius: 60px;
         }
 
         * {
@@ -154,46 +154,6 @@
             isolation: isolate;
         }
 
-        .resize-handle {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 20px;
-            height: 20px;
-            cursor: nwse-resize;
-            z-index: 10;
-            opacity: 0.3;
-            transition: opacity 0.15s;
-        }
-
-        .resize-handle:hover {
-            opacity: 0.7;
-        }
-
-        .resize-handle::before,
-        .resize-handle::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 1px;
-        }
-
-        .resize-handle::before {
-            width: 10px;
-            height: 2px;
-            bottom: 6px;
-            right: 4px;
-            transform: rotate(-45deg);
-        }
-
-        .resize-handle::after {
-            width: 6px;
-            height: 2px;
-            bottom: 4px;
-            right: 2px;
-            transform: rotate(-45deg);
-        }
-
         .chrome-note {
             position: fixed;
             bottom: 14px;
@@ -233,16 +193,16 @@
     <div id="controls">
         <h2>Glass Shape</h2>
         <label>Width:
-            <input type="range" id="glass-width" min="100" max="700" value="300" />
+            <input type="range" id="glass-width" min="200" max="700" value="300" />
             <span class="value-display" id="glass-width-val">300</span>
         </label>
         <label>Height:
-            <input type="range" id="glass-height" min="80" max="500" value="200" />
+            <input type="range" id="glass-height" min="200" max="800" value="200" />
             <span class="value-display" id="glass-height-val">200</span>
         </label>
         <label>Border Radius:
-            <input type="range" id="border-radius" min="4" max="100" value="50" />
-            <span class="value-display" id="border-radius-val">28</span>
+            <input type="range" id="border-radius" min="4" max="100" value="60" />
+            <span class="value-display" id="border-radius-val">60</span>
         </label>
 
         <h2>Surface Profile</h2>
@@ -251,8 +211,8 @@
                 <option value="convex_squircle" selected>
                     Convex Squircle
                 </option>
-                <option value="convex_circle">Convex Circle</option>
-                <option value="concave">Concave</option>
+                <!-- <option value="convex_circle">Convex Circle</option> -->
+                <!-- <option value="concave">Concave</option> -->
                 <option value="lip">Lip</option>
             </select>
         </label>
@@ -321,9 +281,7 @@
         <input type="text" id="bg-url" placeholder="Paste image URL…" />
     </div>
 
-    <div class="glassDiv" id="glass">
-        <div class="resize-handle" id="resize-handle"></div>
-    </div>
+    <div class="glassDiv" id="glass"></div>
 
     <div class="chrome-note">⚠ SVG backdrop-filter is Chrome / Chromium only</div>
 
@@ -622,7 +580,6 @@
         (function () {
             let sx, sy;
             glass.addEventListener('pointerdown', (e) => {
-                if (e.target.id === 'resize-handle') return; // don't drag when resizing
                 e.preventDefault();
                 sx = e.clientX;
                 sy = e.clientY;
@@ -635,41 +592,6 @@
                 glass.style.top = glass.offsetTop + e.clientY - sy + 'px';
                 sx = e.clientX;
                 sy = e.clientY;
-            }
-        })();
-
-        // Resize handle
-        (function () {
-            const handle = document.getElementById('resize-handle');
-            let sx, sy, sw, sh;
-
-            handle.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                sx = e.clientX;
-                sy = e.clientY;
-                sw = glass.offsetWidth;
-                sh = glass.offsetHeight;
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', onUp, { once: true });
-            });
-
-            function onMove(e) {
-                e.preventDefault();
-                const nw = Math.max(80, sw + e.clientX - sx);
-                const nh = Math.max(60, sh + e.clientY - sy);
-                glass.style.width = nw + 'px';
-                glass.style.height = nh + 'px';
-                // Sync sliders
-                document.getElementById('glass-width').value = nw;
-                document.getElementById('glass-width-val').textContent = Math.round(nw);
-                document.getElementById('glass-height').value = nh;
-                document.getElementById('glass-height-val').textContent = Math.round(nh);
-                scheduleRebuild();
-            }
-
-            function onUp() {
-                document.removeEventListener('pointermove', onMove);
             }
         })();
     </script>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Glass — WebGL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            background: #000;
+        }
+
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+        }
+
+        canvas#gl {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Invisible drag target that sits over the glass region */
+        #dragger {
+            position: fixed;
+            z-index: 2;
+            cursor: move;
+            touch-action: none;
+            /* Debug: uncomment to see the hit area */
+            /* background: rgba(255,0,0,0.1); */
+        }
+
+        #controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: #fff;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            max-width: 280px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        #controls h2 {
+            margin: 12px 0 6px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #controls h2:first-child {
+            margin-top: 0;
+        }
+
+        #controls label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 4px 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #controls input[type=range] {
+            width: 100px;
+            accent-color: #8b7cf7;
+        }
+
+        .vd {
+            font-family: ui-monospace, monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .note {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 14px;
+            border-radius: 50px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            z-index: 10;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="bg"></div>
+    <canvas id="gl"></canvas>
+    <div id="dragger"></div>
+
+    <div id="controls">
+        <h2>Glass</h2>
+        <label>Width <input type="range" id="gw" min="120" max="600" value="320"><span class="vd"
+                id="gw-v">320</span></label>
+        <label>Height <input type="range" id="gh" min="80" max="400" value="200"><span class="vd"
+                id="gh-v">200</span></label>
+        <label>Radius <input type="range" id="gr" min="4" max="120" value="32"><span class="vd"
+                id="gr-v">32</span></label>
+
+        <h2>Refraction</h2>
+        <label>Thickness <input type="range" id="thick" min="10" max="200" value="80"><span class="vd"
+                id="thick-v">80</span></label>
+        <label>Bezel <input type="range" id="bezel" min="2" max="60" value="20"><span class="vd"
+                id="bezel-v">20</span></label>
+        <label>IOR <input type="range" id="ior" min="1.0" max="3.0" step="0.05" value="1.5"><span class="vd"
+                id="ior-v">1.50</span></label>
+
+        <h2>Look</h2>
+        <label>Blur <input type="range" id="blur" min="0" max="12" step="0.5" value="1.5"><span class="vd"
+                id="blur-v">1.5</span></label>
+        <label>Specular <input type="range" id="spec" min="0" max="1" step="0.05" value="0.55"><span class="vd"
+                id="spec-v">0.55</span></label>
+        <label>Tint <input type="range" id="tint" min="0" max="40" value="8"><span class="vd"
+                id="tint-v">8%</span></label>
+        <label>Shadow <input type="range" id="shadow" min="0" max="1" step="0.05" value="0.5"><span class="vd"
+                id="shadow-v">0.50</span></label>
+    </div>
+
+    <div class="note">WebGL — works in all browsers</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ════════════════════════════════════════════════════════════════
+        //  Liquid Glass — WebGL / Three.js
+        //  Cross-browser: refraction via fragment shader
+        // ════════════════════════════════════════════════════════════════
+
+        // ── State ──
+        const state = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            gw: 320, gh: 200, gr: 32,
+            thick: 80, bezel: 20, ior: 1.5,
+            blur: 1.5, spec: 0.55, tint: 0.08, shadow: 0.5,
+        };
+
+        // ── Three.js setup ──
+        const canvas = document.getElementById('gl');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+        // Load background as texture
+        const bgLoader = new THREE.TextureLoader();
+        let bgTexture = null;
+        const bgUrl = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop';
+        bgLoader.load(bgUrl, tex => {
+            tex.minFilter = THREE.LinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+            tex.flipY = false;
+            bgTexture = tex;
+            material.uniforms.uBgTex.value = tex;
+            material.uniforms.uBgAspect.value = tex.image.width / tex.image.height;
+        });
+
+        // ── Shader ──
+        const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+    }
+`;
+
+        const fragmentShader = `
+    precision highp float;
+    varying vec2 vUv;
+
+    uniform vec2 uResolution;
+    uniform vec2 uGlassCenter;  // px
+    uniform vec2 uGlassSize;    // px
+    uniform float uRadius;      // px
+    uniform float uBezel;       // px
+    uniform float uThickness;
+    uniform float uIOR;
+    uniform float uBlur;
+    uniform float uSpecular;
+    uniform float uTint;
+    uniform float uShadow;
+    uniform sampler2D uBgTex;
+    uniform float uBgAspect;
+
+    // Signed distance to rounded rect (negative inside)
+    float sdRoundedRect(vec2 p, vec2 halfSize, float r) {
+        vec2 q = abs(p) - halfSize + r;
+        return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+    }
+
+    // Squircle surface height: y = (1 - (1-x)^4)^0.25
+    float surfaceHeight(float t) {
+        float s = 1.0 - t;
+        return pow(1.0 - s*s*s*s, 0.25);
+    }
+
+    // Sample background with cover-fit
+    vec3 sampleBg(vec2 uv) {
+        float screenAspect = uResolution.x / uResolution.y;
+        vec2 bgUv = uv;
+        if (uBgAspect > screenAspect) {
+            float scale = screenAspect / uBgAspect;
+            bgUv.x = bgUv.x * scale + (1.0 - scale) * 0.5;
+        } else {
+            float scale = uBgAspect / screenAspect;
+            bgUv.y = bgUv.y * scale + (1.0 - scale) * 0.5;
+        }
+        bgUv.y = 1.0 - bgUv.y;
+        return texture2D(uBgTex, bgUv).rgb;
+    }
+
+    // Blur by sampling in a disc
+    vec3 sampleBgBlurred(vec2 uv, float radius) {
+        if (radius < 0.5) return sampleBg(uv);
+        vec3 sum = vec3(0.0);
+        float total = 0.0;
+        vec2 px = 1.0 / uResolution;
+        // 16-tap Poisson disc
+        const int TAPS = 16;
+        vec2 offsets[16];
+        offsets[0]  = vec2(-0.94201, -0.39906);
+        offsets[1]  = vec2( 0.94558, -0.76890);
+        offsets[2]  = vec2(-0.09418, -0.92938);
+        offsets[3]  = vec2( 0.34495,  0.29387);
+        offsets[4]  = vec2(-0.91588, -0.45771);
+        offsets[5]  = vec2(-0.81544,  0.48568);
+        offsets[6]  = vec2(-0.38277, -0.56071);
+        offsets[7]  = vec2(-0.12675,  0.84686);
+        offsets[8]  = vec2( 0.89642,  0.41254);
+        offsets[9]  = vec2( 0.18150, -0.30020);
+        offsets[10] = vec2(-0.01445, -0.16001);
+        offsets[11] = vec2( 0.59614,  0.71118);
+        offsets[12] = vec2( 0.49742, -0.47280);
+        offsets[13] = vec2( 0.80685,  0.04588);
+        offsets[14] = vec2(-0.32490, -0.03965);
+        offsets[15] = vec2(-0.60975,  0.06566);
+        for (int i = 0; i < 16; i++) {
+            vec2 off = offsets[i] * radius * px;
+            sum += sampleBg(uv + off);
+            total += 1.0;
+        }
+        return sum / total;
+    }
+
+    void main() {
+        vec2 fragCoord = vUv * uResolution;
+        vec2 p = fragCoord - uGlassCenter;
+        vec2 halfSize = uGlassSize * 0.5;
+
+        float sd = sdRoundedRect(p, halfSize, uRadius);
+
+        // Outer shadow
+        if (sd > 0.0) {
+            float shadowFalloff = exp(-sd * sd / (800.0));
+            float shadowAlpha = uShadow * shadowFalloff * 0.6;
+            gl_FragColor = vec4(0.0, 0.0, 0.0, shadowAlpha);
+            return;
+        }
+
+        // Inside the glass — compute refraction
+        float distFromEdge = -sd;  // positive inside
+        float bezel = min(uBezel, min(halfSize.x, halfSize.y) - 1.0);
+        float t = clamp(distFromEdge / bezel, 0.0, 1.0);
+
+        // Surface height and derivative for Snell's law
+        float h = surfaceHeight(t);
+        float dt = 0.001;
+        float h2 = surfaceHeight(min(t + dt, 1.0));
+        float dh = (h2 - h) / dt;
+
+        // Surface slope → angle of incidence
+        float slopeAngle = atan(dh * (uThickness / bezel));
+        float sinR = sin(slopeAngle) / uIOR;
+        sinR = clamp(sinR, -1.0, 1.0);
+        float thetaR = asin(sinR);
+
+        // Displacement magnitude
+        float displacement = h * uThickness * (tan(slopeAngle) - tan(thetaR));
+
+        // Direction: gradient of the SDF (points toward nearest edge)
+        vec2 grad;
+        float eps = 0.5;
+        grad.x = sdRoundedRect(p + vec2(eps, 0.0), halfSize, uRadius) - sd;
+        grad.y = sdRoundedRect(p + vec2(0.0, eps), halfSize, uRadius) - sd;
+        grad = normalize(grad);
+
+        // Apply displacement to UV
+        vec2 offset = grad * displacement / uResolution;
+        vec2 refractedUv = vUv + offset;
+
+        // Sample background with blur
+        vec3 color = sampleBgBlurred(refractedUv, uBlur);
+
+        // ── Specular highlight (rim light) ──
+        vec2 lightDir = normalize(vec2(0.5, -0.7));
+        float rimDot = abs(dot(grad, lightDir));
+        float rimFalloff = 1.0 - smoothstep(0.0, bezel * 0.4, distFromEdge);
+        float specHighlight = rimDot * rimFalloff;
+        specHighlight = pow(specHighlight, 1.5);
+        color += vec3(specHighlight * uSpecular);
+
+        // ── Inner shadow (soft dark edge near border) ──
+        float innerShadow = 1.0 - smoothstep(0.0, bezel * 0.6, distFromEdge);
+        color *= mix(1.0, 0.7, innerShadow * 0.3);
+
+        // ── Bright inner rim ──
+        float innerRim = smoothstep(0.0, 2.0, distFromEdge) * (1.0 - smoothstep(2.0, 5.0, distFromEdge));
+        color += vec3(innerRim * 0.15 * uSpecular);
+
+        // ── Tint ──
+        color = mix(color, vec3(1.0), uTint);
+
+        // ── Edge anti-aliasing ──
+        float alpha = smoothstep(0.0, 1.5, distFromEdge);
+
+        gl_FragColor = vec4(color, alpha);
+    }
+`;
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            uniforms: {
+                uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                uGlassCenter: { value: new THREE.Vector2(state.x, state.y) },
+                uGlassSize: { value: new THREE.Vector2(state.gw, state.gh) },
+                uRadius: { value: state.gr },
+                uBezel: { value: state.bezel },
+                uThickness: { value: state.thick },
+                uIOR: { value: state.ior },
+                uBlur: { value: state.blur },
+                uSpecular: { value: state.spec },
+                uTint: { value: state.tint },
+                uShadow: { value: state.shadow },
+                uBgTex: { value: null },
+                uBgAspect: { value: 1.5 },
+            },
+            transparent: true,
+            depthTest: false,
+        });
+
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+        scene.add(quad);
+
+        // ── Render loop ──
+        function render() {
+            const u = material.uniforms;
+            const dpr = window.devicePixelRatio;
+            u.uResolution.value.set(window.innerWidth * dpr, window.innerHeight * dpr);
+            u.uGlassCenter.value.set(state.x * dpr, (window.innerHeight - state.y) * dpr);
+            u.uGlassSize.value.set(state.gw * dpr, state.gh * dpr);
+            u.uRadius.value = state.gr * dpr;
+            u.uBezel.value = state.bezel * dpr;
+            u.uThickness.value = state.thick;
+            u.uIOR.value = state.ior;
+            u.uBlur.value = state.blur;
+            u.uSpecular.value = state.spec;
+            u.uTint.value = state.tint;
+            u.uShadow.value = state.shadow;
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+        render();
+
+        // ── Resize ──
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ── Sync dragger div to glass position ──
+        const dragger = document.getElementById('dragger');
+        function syncDragger() {
+            dragger.style.left = (state.x - state.gw / 2) + 'px';
+            dragger.style.top = (state.y - state.gh / 2) + 'px';
+            dragger.style.width = state.gw + 'px';
+            dragger.style.height = state.gh + 'px';
+            dragger.style.borderRadius = state.gr + 'px';
+        }
+        syncDragger();
+
+        // ── Drag ──
+        (function () {
+            let sx, sy;
+            dragger.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                sx = e.clientX; sy = e.clientY;
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', () =>
+                    document.removeEventListener('pointermove', onMove), { once: true });
+            });
+            function onMove(e) {
+                e.preventDefault();
+                state.x += e.clientX - sx;
+                state.y += e.clientY - sy;
+                sx = e.clientX; sy = e.clientY;
+                syncDragger();
+            }
+        })();
+
+        // ── Controls ──
+        const CTRLS = [
+            ['gw', 'gw', v => Math.round(v)],
+            ['gh', 'gh', v => Math.round(v)],
+            ['gr', 'gr', v => Math.round(v)],
+            ['thick', 'thick', v => Math.round(v)],
+            ['bezel', 'bezel', v => Math.round(v)],
+            ['ior', 'ior', v => (+v).toFixed(2)],
+            ['blur', 'blur', v => (+v).toFixed(1)],
+            ['spec', 'spec', v => (+v).toFixed(2)],
+            ['tint', 'tint', v => Math.round(v) + '%'],
+            ['shadow', 'shadow', v => (+v).toFixed(2)],
+        ];
+
+        CTRLS.forEach(([id, key, fmt]) => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => {
+                const raw = +el.value;
+                state[key] = key === 'tint' ? raw / 100 : raw;
+                document.getElementById(id + '-v').textContent = fmt(el.value);
+                syncDragger();
+            });
+        });
+    </script>
+</body>
+
+</html>
