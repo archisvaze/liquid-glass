@@ -44,6 +44,9 @@
         <label>Shadow
             <input type="range" id="shadow" min="0" max="1" step="0.05" value="0.5" /><span class="vd"
                 id="shadow-v">0.50</span></label>
+
+        <h2>Background</h2>
+        <div id="bg-picker"></div>
     </div>
 
     <div class="bottom-bar">
@@ -77,14 +80,19 @@
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
         let bgTexture = null;
-        const bgUrl = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop';
-        new THREE.TextureLoader().load(bgUrl, (tex) => {
-            tex.minFilter = THREE.LinearFilter;
-            tex.magFilter = THREE.LinearFilter;
-            bgTexture = tex;
-            material.uniforms.uBgTex.value = tex;
-            material.uniforms.uBgAspect.value = tex.image.width / tex.image.height;
-        });
+        const defaultBgUrl = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop';
+
+        /** Load a URL into the WebGL texture + CSS background div */
+        function loadBgTexture(url) {
+            new THREE.TextureLoader().load(url, (tex) => {
+                tex.minFilter = THREE.LinearFilter;
+                tex.magFilter = THREE.LinearFilter;
+                bgTexture = tex;
+                material.uniforms.uBgTex.value = tex;
+                material.uniforms.uBgAspect.value = tex.image.width / tex.image.height;
+                document.getElementById('bg').style.background = "url('" + url + "') center/cover no-repeat";
+            });
+        }
 
         const vertexShader = `
 varying vec2 vUv;
@@ -322,6 +330,16 @@ void main() {
                 document.getElementById(id + '-v').textContent = fmt(el.value);
                 syncDragger();
             });
+        });
+    </script>
+
+    <script src="./bg-picker.js"></script>
+    <script>
+        BgPicker.init({
+            defaultUrl: defaultBgUrl,
+            onApply: function (url) {
+                loadBgTexture(url);
+            },
         });
     </script>
 </body>

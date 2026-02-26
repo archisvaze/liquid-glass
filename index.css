@@ -1,5 +1,3 @@
-/* ── Shared styles for Liquid Glass demos ── */
-
 :root {
     --tint-color: 255, 255, 255;
     --tint-opacity: 0.06;
@@ -218,6 +216,82 @@ canvas#gl {
     z-index: 2;
     cursor: move;
     touch-action: none;
+}
+
+/* ── Background Picker ── */
+
+.bg-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 6px;
+}
+
+.bg-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    object-fit: cover;
+    transition: border-color 0.15s, transform 0.1s;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bg-thumb:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.06);
+}
+
+.bg-thumb.active {
+    border-color: #8b7cf7;
+    box-shadow: 0 0 0 1px #8b7cf7;
+}
+
+.bg-thumb-custom {
+    position: relative;
+    display: none;
+}
+
+.bg-thumb-custom.visible {
+    display: block;
+}
+
+.bg-url-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.bg-url-row input[type='text'] {
+    flex: 1;
+    margin-top: 0 !important;
+}
+
+.bg-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+.bg-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.bg-btn.reset {
+    background: rgba(138, 124, 247, 0.25);
+    border-color: rgba(138, 124, 247, 0.4);
+}
+
+.bg-btn.reset:hover {
+    background: rgba(138, 124, 247, 0.4);
 }
 
 /* ── Mobile ── */

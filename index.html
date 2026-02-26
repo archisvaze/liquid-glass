@@ -103,7 +103,7 @@
         </label>
 
         <h2>Background</h2>
-        <input type="text" id="bg-url" placeholder="Paste image URL…" />
+        <div id="bg-picker"></div>
     </div>
 
     <div class="glassDiv" id="glass"></div>
@@ -383,10 +383,6 @@
 
         document.getElementById('surface-fn').addEventListener('change', scheduleRebuild);
 
-        document.getElementById('bg-url').addEventListener('change', function () {
-            if (this.value) document.body.style.background = `url('${this.value}') center/cover no-repeat`;
-        });
-
         window.addEventListener('DOMContentLoaded', () => {
             updateCSS();
             requestAnimationFrame(() => requestAnimationFrame(rebuildFilter));
@@ -416,6 +412,16 @@
                 sy = e.clientY;
             }
         })();
+    </script>
+
+    <script src="./bg-picker.js"></script>
+    <script>
+        BgPicker.init({
+            defaultUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+            onApply: function (url) {
+                document.body.style.background = "url('" + url + "') center/cover no-repeat";
+            },
+        });
     </script>
 </body>
 
