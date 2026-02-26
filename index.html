@@ -5,186 +5,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>Liquid Glass — Physics-Based Refraction</title>
+    <link rel="stylesheet" href="./index.css" />
     <style>
-        :root {
-            --tint-color: 255, 255, 255;
-            --tint-opacity: 0.06;
-            --shadow-blur: 20px;
-            --shadow-spread: -5px;
-            --shadow-color: rgba(255, 255, 255, 0.45);
-            --outer-shadow-blur: 24px;
-            --glass-radius: 60px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            width: 100vw;
-            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
             font-weight: 300;
             position: relative;
-            overflow: hidden;
-            color: #fff;
-        }
-
-        /* ── Controls Panel ── */
-        #controls {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.72);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            color: #fff;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 13px;
-            max-width: 300px;
-            max-height: 90vh;
-            overflow-y: auto;
-            z-index: 100;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        #controls h2 {
-            margin: 14px 0 6px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        #controls h2:first-child {
-            margin-top: 0;
-        }
-
-        #controls label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 5px 0;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        #controls input[type='range'] {
-            width: 110px;
-            accent-color: #8b7cf7;
-        }
-
-        #controls .value-display {
-            font-family: 'SF Mono', ui-monospace, monospace;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            min-width: 36px;
-            text-align: right;
-        }
-
-        #controls select {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        #controls input[type='text'] {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 6px;
-            padding: 4px 8px;
-            color: #fff;
-            font-size: 12px;
-            width: 100%;
-            margin-top: 4px;
-        }
-
-        #controls input[type='color'] {
-            width: 28px;
-            height: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
-            padding: 0;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .glassDiv {
-            position: absolute;
-            width: 300px;
-            height: 200px;
-            border-radius: var(--glass-radius);
-            cursor: move;
-            isolation: isolate;
-            touch-action: none;
-            box-shadow: 0px 4px var(--outer-shadow-blur) rgba(0, 0, 0, 0.18);
-        }
-
-        .glassDiv::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            border-radius: inherit;
-            box-shadow: inset 0 0 var(--shadow-blur) var(--shadow-spread) var(--shadow-color);
-            background-color: rgba(var(--tint-color), var(--tint-opacity));
-            pointer-events: none;
-        }
-
-        .glassDiv::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            border-radius: inherit;
-            backdrop-filter: url(#liquid-glass-filter);
-            -webkit-backdrop-filter: url(#liquid-glass-filter);
-            isolation: isolate;
-        }
-
-        .chrome-note {
-            position: fixed;
-            bottom: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.35);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 6px 14px;
-            border-radius: 50px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            z-index: 50;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 600px) {
-            .glassDiv {
-                width: 220px;
-                height: 140px;
-            }
-
-            #controls {
-                top: auto;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                max-width: 100%;
-                border-radius: 14px 14px 0 0;
-                max-height: 50vh;
-            }
         }
     </style>
 </head>
@@ -201,7 +29,7 @@
             <span class="value-display" id="glass-height-val">200</span>
         </label>
         <label>Border Radius:
-            <input type="range" id="border-radius" min="20" max="100" value="60" />
+            <input type="range" id="border-radius" min="20" max="120" value="60" />
             <span class="value-display" id="border-radius-val">60</span>
         </label>
 
@@ -211,8 +39,6 @@
                 <option value="convex_squircle" selected>
                     Convex Squircle
                 </option>
-                <!-- <option value="convex_circle">Convex Circle</option> -->
-                <!-- <option value="concave">Concave</option> -->
                 <option value="lip">Lip</option>
             </select>
         </label>
@@ -283,7 +109,10 @@
 
     <div class="glassDiv" id="glass"></div>
 
-    <div class="chrome-note">⚠ SVG backdrop-filter is Chrome / Chromium only</div>
+    <div class="bottom-bar">
+        <span class="bottom-note">⚠ SVG backdrop-filter is Chrome / Chromium only</span>
+        <a class="switch-btn" href="./webgl.html">Switch to WebGL version →</a>
+    </div>
 
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
         color-interpolation-filters="sRGB">
@@ -480,7 +309,6 @@
             const root = document.documentElement.style;
             const gs = glass.style;
 
-            // Size
             const w = +document.getElementById('glass-width').value;
             const h = +document.getElementById('glass-height').value;
             const br = +document.getElementById('border-radius').value;
@@ -488,7 +316,6 @@
             gs.height = h + 'px';
             root.setProperty('--glass-radius', br + 'px');
 
-            // Inner shadow
             const shColor = document.getElementById('shadow-color').value;
             const shBlur = +document.getElementById('shadow-blur').value;
             const shSpread = +document.getElementById('shadow-spread').value;
@@ -496,13 +323,11 @@
             root.setProperty('--shadow-blur', shBlur + 'px');
             root.setProperty('--shadow-spread', shSpread + 'px');
 
-            // Tint
             const tintColor = document.getElementById('tint-color').value;
             const tintOp = +document.getElementById('tint-opacity').value;
             root.setProperty('--tint-color', hexToRgb(tintColor));
             root.setProperty('--tint-opacity', (tintOp / 100).toFixed(3));
 
-            // Outer shadow
             const outerBlur = +document.getElementById('outer-shadow-blur').value;
             root.setProperty('--outer-shadow-blur', outerBlur + 'px');
         }
@@ -572,11 +397,9 @@
             timer = setTimeout(rebuildFilter, 150);
         });
 
-        // Center glass on load
         glass.style.left = innerWidth / 2 - 150 + 'px';
         glass.style.top = innerHeight / 2 - 100 + 'px';
 
-        // Drag
         (function () {
             let sx, sy;
             glass.addEventListener('pointerdown', (e) => {
