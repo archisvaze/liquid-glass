@@ -1,6 +1,6 @@
 # Liquid Glass
 
-An interactive demo of an **iOS 26–style Liquid Glass** effect for the web — now with two rendering engines, physics-based refraction, and a background picker.
+An interactive demo of an **iOS 26–style Liquid Glass** effect for the web.
 
 <img width="1920" height="963" alt="Liquid Glass demo screenshot" src="https://github.com/user-attachments/assets/f67312bd-cee7-4fe2-9cc0-7e6f7b2ccdcc" />
 
