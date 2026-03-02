@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
     <title>Liquid Glass — WebGL</title>
     <link rel="stylesheet" href="./index.css" />
 </head>
@@ -13,46 +13,92 @@
     <canvas id="gl"></canvas>
     <div id="dragger"></div>
 
+    <button class="panel-toggle" id="panel-toggle" aria-label="Toggle controls">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" />
+            <line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" />
+            <line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
+        </svg>
+    </button>
+
     <div id="controls">
-        <h2>Glass</h2>
-        <label>Width
-            <input type="range" id="gw" min="200" max="700" value="300" /><span class="vd" id="gw-v">300</span></label>
-        <label>Height
-            <input type="range" id="gh" min="200" max="800" value="200" /><span class="vd" id="gh-v">200</span></label>
-        <label>Radius
-            <input type="range" id="gr" min="4" max="100" value="60" /><span class="vd" id="gr-v">60</span></label>
+        <div class="controls-header">
+            <span class="controls-title">Controls</span>
+            <button class="close-btn" id="panel-close" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="controls-scroll">
+            <h2>Glass</h2>
+            <label>Width
+                <input type="range" id="gw" min="200" max="700" value="300" /><span class="vd"
+                    id="gw-v">300</span></label>
+            <label>Height
+                <input type="range" id="gh" min="200" max="800" value="200" /><span class="vd"
+                    id="gh-v">200</span></label>
+            <label>Radius
+                <input type="range" id="gr" min="4" max="100" value="60" /><span class="vd" id="gr-v">60</span></label>
 
-        <h2>Refraction</h2>
-        <label>Thickness
-            <input type="range" id="thick" min="10" max="200" value="50" /><span class="vd"
-                id="thick-v">50</span></label>
-        <label>Bezel
-            <input type="range" id="bezel" min="2" max="60" value="60" /><span class="vd" id="bezel-v">60</span></label>
-        <label>IOR
-            <input type="range" id="ior" min="1.0" max="3.0" step="0.05" value="3.0" /><span class="vd"
-                id="ior-v">3.0</span></label>
+            <h2>Refraction</h2>
+            <label>Thickness
+                <input type="range" id="thick" min="10" max="200" value="50" /><span class="vd"
+                    id="thick-v">50</span></label>
+            <label>Bezel
+                <input type="range" id="bezel" min="2" max="60" value="60" /><span class="vd"
+                    id="bezel-v">60</span></label>
+            <label>IOR
+                <input type="range" id="ior" min="1.0" max="3.0" step="0.05" value="3.0" /><span class="vd"
+                    id="ior-v">3.0</span></label>
 
-        <h2>Look</h2>
-        <label>Blur
-            <input type="range" id="blur" min="0" max="12" step="0.5" value="1.5" /><span class="vd"
-                id="blur-v">1.5</span></label>
-        <label>Specular
-            <input type="range" id="spec" min="0" max="1" step="0.05" value="0.55" /><span class="vd"
-                id="spec-v">0.55</span></label>
-        <label>Tint
-            <input type="range" id="tint" min="0" max="40" value="8" /><span class="vd" id="tint-v">8%</span></label>
-        <label>Shadow
-            <input type="range" id="shadow" min="0" max="1" step="0.05" value="0.5" /><span class="vd"
-                id="shadow-v">0.50</span></label>
+            <h2>Look</h2>
+            <label>Blur
+                <input type="range" id="blur" min="0" max="12" step="0.5" value="1.5" /><span class="vd"
+                    id="blur-v">1.5</span></label>
+            <label>Specular
+                <input type="range" id="spec" min="0" max="1" step="0.05" value="0.55" /><span class="vd"
+                    id="spec-v">0.55</span></label>
+            <label>Tint
+                <input type="range" id="tint" min="0" max="40" value="8" /><span class="vd"
+                    id="tint-v">8%</span></label>
+            <label>Shadow
+                <input type="range" id="shadow" min="0" max="1" step="0.05" value="0.5" /><span class="vd"
+                    id="shadow-v">0.50</span></label>
 
-        <h2>Background</h2>
-        <div id="bg-picker"></div>
+            <h2>Background</h2>
+            <div id="bg-picker"></div>
+        </div>
     </div>
 
     <div class="bottom-bar">
         <span class="bottom-note">WebGL — works in all browsers</span>
         <a class="switch-btn" href="./">← Switch to SVG version</a>
     </div>
+
+    <script>
+        (function () {
+            var panel = document.getElementById('controls');
+            var toggle = document.getElementById('panel-toggle');
+            var close = document.getElementById('panel-close');
+            toggle.addEventListener('click', function () {
+                panel.classList.add('open');
+                toggle.classList.add('hidden');
+            });
+            close.addEventListener('click', function () {
+                panel.classList.remove('open');
+                toggle.classList.remove('hidden');
+            });
+        })();
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -82,7 +128,6 @@
         let bgTexture = null;
         const defaultBgUrl = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop';
 
-        /** Load a URL into the WebGL texture + CSS background div */
         function loadBgTexture(url) {
             new THREE.TextureLoader().load(url, (tex) => {
                 tex.minFilter = THREE.LinearFilter;
@@ -212,25 +257,20 @@ void main() {
 
   vec3 color = sampleBgBlurred(refractedUV, uBlur);
 
-  // Specular
   vec2 lightDir = normalize(vec2(0.5, -0.7));
   float rimDot = abs(dot(grad, lightDir));
   float rimFalloff = 1.0 - smoothstep(0.0, bezel * 0.4, distFromEdge);
   float specHighlight = pow(rimDot * rimFalloff, 1.5);
   color += vec3(specHighlight * uSpecular);
 
-  // Inner shadow
   float innerShadow = 1.0 - smoothstep(0.0, bezel * 0.6, distFromEdge);
   color *= mix(1.0, 0.7, innerShadow * 0.3);
 
-  // Inner rim
   float innerRim = smoothstep(0.0, 2.0, distFromEdge) * (1.0 - smoothstep(2.0, 5.0, distFromEdge));
   color += vec3(innerRim * 0.15 * uSpecular);
 
-  // Tint
   color = mix(color, vec3(1.0), uTint);
 
-  // AA
   float alpha = smoothstep(0.0, 1.5, distFromEdge);
   gl_FragColor = vec4(color, alpha);
 }`;

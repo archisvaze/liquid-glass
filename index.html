@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Liquid Glass — Physics-Based Refraction</title>
     <link rel="stylesheet" href="./index.css" />
     <style>
@@ -18,105 +18,146 @@
 </head>
 
 <body>
+    <button class="panel-toggle" id="panel-toggle" aria-label="Toggle controls">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" />
+            <line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" />
+            <line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
+        </svg>
+    </button>
+
     <div id="controls">
-        <h2>Glass Shape</h2>
-        <label>Width:
-            <input type="range" id="glass-width" min="200" max="700" value="300" />
-            <span class="value-display" id="glass-width-val">300</span>
-        </label>
-        <label>Height:
-            <input type="range" id="glass-height" min="200" max="800" value="200" />
-            <span class="value-display" id="glass-height-val">200</span>
-        </label>
-        <label>Border Radius:
-            <input type="range" id="border-radius" min="20" max="100" value="60" />
-            <span class="value-display" id="border-radius-val">60</span>
-        </label>
+        <div class="controls-header">
+            <span class="controls-title">Controls</span>
+            <button class="close-btn" id="panel-close" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="controls-scroll">
+            <h2>Glass Shape</h2>
+            <label>Width
+                <input type="range" id="glass-width" min="200" max="700" value="300" />
+                <span class="value-display" id="glass-width-val">300</span>
+            </label>
+            <label>Height
+                <input type="range" id="glass-height" min="200" max="800" value="200" />
+                <span class="value-display" id="glass-height-val">200</span>
+            </label>
+            <label>Border Radius
+                <input type="range" id="border-radius" min="20" max="100" value="60" />
+                <span class="value-display" id="border-radius-val">60</span>
+            </label>
+            <label style="display: none">Shape:
+                <select id="surface-fn">
+                    <option value="convex_squircle" selected>
+                        Convex Squircle
+                    </option>
+                    <option value="lip">Lip</option>
+                </select>
+            </label>
 
-        <label style="display: none;">Shape:
-            <select id="surface-fn">
-                <option value="convex_squircle" selected>
-                    Convex Squircle
-                </option>
-                <option value="lip">Lip</option>
-            </select>
-        </label>
+            <h2>Refraction</h2>
+            <label>Glass Thickness
+                <input type="range" id="glass-thickness" min="10" max="200" value="80" />
+                <span class="value-display" id="glass-thickness-val">80</span>
+            </label>
+            <label>Bezel Width
+                <input type="range" id="bezel-width" min="2" max="60" value="60" />
+                <span class="value-display" id="bezel-width-val">60</span>
+            </label>
+            <label>Refractive Index
+                <input type="range" id="refractive-index" min="1.0" max="3.0" step="0.05" value="3.0" />
+                <span class="value-display" id="refractive-index-val">3.0</span>
+            </label>
+            <label>Scale Ratio
+                <input type="range" id="scale-ratio" min="0.0" max="2.0" step="0.05" value="1.0" />
+                <span class="value-display" id="scale-ratio-val">1.00</span>
+            </label>
 
-        <h2>Refraction</h2>
-        <label>Glass Thickness:
-            <input type="range" id="glass-thickness" min="10" max="200" value="80" />
-            <span class="value-display" id="glass-thickness-val">80</span>
-        </label>
-        <label>Bezel Width:
-            <input type="range" id="bezel-width" min="2" max="60" value="60" />
-            <span class="value-display" id="bezel-width-val">60</span>
-        </label>
-        <label>Refractive Index:
-            <input type="range" id="refractive-index" min="1.0" max="3.0" step="0.05" value="3.0" />
-            <span class="value-display" id="refractive-index-val">3.0</span>
-        </label>
-        <label>Scale Ratio:
-            <input type="range" id="scale-ratio" min="0.0" max="2.0" step="0.05" value="1.0" />
-            <span class="value-display" id="scale-ratio-val">1.00</span>
-        </label>
+            <h2>Appearance</h2>
+            <label>Blur
+                <input type="range" id="blur-amount" min="0" max="8" step="0.1" value="0.3" />
+                <span class="value-display" id="blur-amount-val">0.3</span>
+            </label>
+            <label>Specular Opacity
+                <input type="range" id="specular-opacity" min="0" max="1" step="0.05" value="0.5" />
+                <span class="value-display" id="specular-opacity-val">0.50</span>
+            </label>
+            <label>Specular Saturation
+                <input type="range" id="specular-saturation" min="0" max="12" step="1" value="4" />
+                <span class="value-display" id="specular-saturation-val">4</span>
+            </label>
 
-        <h2>Appearance</h2>
-        <label>Blur:
-            <input type="range" id="blur-amount" min="0" max="8" step="0.1" value="0.3" />
-            <span class="value-display" id="blur-amount-val">0.3</span>
-        </label>
-        <label>Specular Opacity:
-            <input type="range" id="specular-opacity" min="0" max="1" step="0.05" value="0.5" />
-            <span class="value-display" id="specular-opacity-val">0.50</span>
-        </label>
-        <label>Specular Saturation:
-            <input type="range" id="specular-saturation" min="0" max="12" step="1" value="4" />
-            <span class="value-display" id="specular-saturation-val">4</span>
-        </label>
+            <h2>Inner Shadow</h2>
+            <label>Color
+                <input type="color" id="shadow-color" value="#ffffff" />
+            </label>
+            <label>Blur
+                <input type="range" id="shadow-blur" min="0" max="40" value="20" />
+                <span class="value-display" id="shadow-blur-val">20</span>
+            </label>
+            <label>Spread
+                <input type="range" id="shadow-spread" min="-15" max="10" value="-5" />
+                <span class="value-display" id="shadow-spread-val">-5</span>
+            </label>
 
-        <h2>Inner Shadow</h2>
-        <label>Color:
-            <input type="color" id="shadow-color" value="#ffffff" />
-        </label>
-        <label>Blur:
-            <input type="range" id="shadow-blur" min="0" max="40" value="20" />
-            <span class="value-display" id="shadow-blur-val">20</span>
-        </label>
-        <label>Spread:
-            <input type="range" id="shadow-spread" min="-15" max="10" value="-5" />
-            <span class="value-display" id="shadow-spread-val">-5</span>
-        </label>
+            <h2>Glass Tint</h2>
+            <label>Tint Color
+                <input type="color" id="tint-color" value="#ffffff" />
+            </label>
+            <label>Tint Opacity
+                <input type="range" id="tint-opacity" min="0" max="40" step="1" value="6" />
+                <span class="value-display" id="tint-opacity-val">6%</span>
+            </label>
 
-        <h2>Glass Tint</h2>
-        <label>Tint Color:
-            <input type="color" id="tint-color" value="#ffffff" />
-        </label>
-        <label>Tint Opacity:
-            <input type="range" id="tint-opacity" min="0" max="40" step="1" value="6" />
-            <span class="value-display" id="tint-opacity-val">6%</span>
-        </label>
+            <h2>Outer Shadow</h2>
+            <label>Blur
+                <input type="range" id="outer-shadow-blur" min="0" max="50" value="24" />
+                <span class="value-display" id="outer-shadow-blur-val">24</span>
+            </label>
 
-        <h2>Outer Shadow</h2>
-        <label>Blur:
-            <input type="range" id="outer-shadow-blur" min="0" max="50" value="24" />
-            <span class="value-display" id="outer-shadow-blur-val">24</span>
-        </label>
-
-        <h2>Background</h2>
-        <div id="bg-picker"></div>
+            <h2>Background</h2>
+            <div id="bg-picker"></div>
+        </div>
     </div>
 
     <div class="glassDiv" id="glass"></div>
 
     <div class="bottom-bar">
         <span class="bottom-note">⚠ SVG backdrop-filter is Chrome / Chromium only</span>
-        <a class="switch-btn" href="./webgl.html">Switch to WebGL version →</a>
+        <a class="switch-btn" href="./webgl.html">Switch to WebGL →</a>
     </div>
 
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
         color-interpolation-filters="sRGB">
         <defs id="svg-defs"></defs>
     </svg>
+
+    <script>
+        (function () {
+            var panel = document.getElementById('controls');
+            var toggle = document.getElementById('panel-toggle');
+            var close = document.getElementById('panel-close');
+            toggle.addEventListener('click', function () {
+                panel.classList.add('open');
+                toggle.classList.add('hidden');
+            });
+            close.addEventListener('click', function () {
+                panel.classList.remove('open');
+                toggle.classList.remove('hidden');
+            });
+        })();
+    </script>
 
     <script>
         const SURFACE_FNS = {
