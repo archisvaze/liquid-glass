@@ -2,7 +2,16 @@
 
 An interactive demo of an **iOS 26–style Liquid Glass** effect for the web.
 
-<img width="1920" height="963" alt="Liquid Glass demo screenshot" src="https://github.com/user-attachments/assets/f67312bd-cee7-4fe2-9cc0-7e6f7b2ccdcc" />
+<img width="487" height="367" alt="Screenshot 2026-03-02 at 08 49 33" src="https://github.com/user-attachments/assets/77694823-f4ce-4731-963f-c8bb47c8d7c0" />
+
+<img width="382" height="362" alt="Screenshot 2026-03-02 at 08 49 20" src="https://github.com/user-attachments/assets/26be7540-aff0-412e-b017-877103cced5f" />
+
+<img width="581" height="439" alt="Screenshot 2026-03-02 at 08 50 23" src="https://github.com/user-attachments/assets/682dd24a-9c56-4fb3-9271-ce9536c055a7" />
+
+<img width="638" height="579" alt="Screenshot 2026-03-02 at 08 50 47" src="https://github.com/user-attachments/assets/287c971f-ae48-4e82-a30f-b24cd363e45f" />
+
+<img width="1113" height="647" alt="Screenshot 2026-03-02 at 08 51 59" src="https://github.com/user-attachments/assets/f03aa6c0-2dab-4687-9d52-4cc8eec475da" />
+
 
 > **Chromium-only (SVG version).** The SVG backdrop-filter approach only works in Chrome / Edge / Chromium-based browsers. The **WebGL version works in all browsers** including Safari and Firefox. Please file issues if you spot any quirks!
 
