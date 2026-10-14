@@ -15,22 +15,56 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+}
+
+html {
+    touch-action: manipulation;
+}
+
 body {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-    background: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    background: url('./backgrounds/default.avif') center/cover no-repeat;
     color: #fff;
     -webkit-font-smoothing: antialiased;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+.bg-thumb:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 #controls {
     position: fixed;
-    top: 12px;
-    left: 12px;
-    bottom: 12px;
-    width: 272px;
+    top: calc(12px + env(safe-area-inset-top));
+    left: calc(12px + env(safe-area-inset-left));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: 288px;
     background: rgba(22, 22, 26, 0.72);
     backdrop-filter: blur(40px) saturate(1.4);
     -webkit-backdrop-filter: blur(40px) saturate(1.4);
@@ -124,17 +158,17 @@ body {
 }
 
 #controls label {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) 32px;
     align-items: center;
     margin: 5px 0;
     font-size: 12.5px;
     color: rgba(255, 255, 255, 0.55);
-    gap: 8px;
+    column-gap: 8px;
 }
 
 #controls input[type='range'] {
-    flex: 1;
+    width: 100%;
     min-width: 0;
     accent-color: var(--accent);
 }
@@ -186,10 +220,53 @@ body {
     flex-shrink: 0;
 }
 
+#controls label input[type='color'] {
+    grid-column: 2 / 4;
+    justify-self: end;
+}
+
+.preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 2px 0 8px;
+}
+
+.chip {
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50px;
+    padding: 5px 11px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.chip:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.controls-footer {
+    display: flex;
+    gap: 6px;
+    padding: 10px 14px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.controls-footer .bg-btn {
+    flex: 1;
+    padding: 8px 6px;
+}
+
 .panel-toggle {
     position: fixed;
-    top: 16px;
-    left: 16px;
+    top: calc(16px + env(safe-area-inset-top));
+    left: calc(16px + env(safe-area-inset-left));
     z-index: 101;
     width: 40px;
     height: 40px;
@@ -222,7 +299,7 @@ body {
 
 .bottom-bar {
     position: fixed;
-    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -230,6 +307,9 @@ body {
     gap: 8px;
     z-index: 50;
     max-width: calc(100vw - 32px);
+    transition:
+        opacity 0.2s,
+        visibility 0.2s;
 }
 
 .bottom-note {
@@ -274,6 +354,29 @@ body {
     transform: scale(0.97);
 }
 
+.bottom-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 14px;
+    border-radius: 50px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.bottom-link:hover {
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+}
+
 .glassDiv {
     position: absolute;
     width: 300px;
@@ -311,7 +414,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 0;
-    background: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    background: url('./backgrounds/default.avif') center/cover no-repeat;
 }
 
 canvas#gl {
@@ -404,12 +507,93 @@ canvas#gl {
     background: rgba(138, 124, 247, 0.35);
 }
 
-@media (max-width: 600px) {
-    .glassDiv {
-        width: 220px;
-        height: 140px;
-    }
+.bg-btn.primary {
+    background: var(--accent);
+    border-color: transparent;
+}
 
+.bg-btn.primary:hover {
+    background: #7b6ae7;
+}
+
+.bg-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.bg-btn-wide {
+    flex: 1;
+}
+
+.bg-hint {
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+@media (hover: none) {
+    .bg-hint {
+        display: none;
+    }
+}
+
+.bg-error {
+    margin-top: 6px;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: #ffa3a3;
+}
+
+.browser-notice {
+    position: fixed;
+    top: calc(16px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    width: min(420px, calc(100vw - 32px));
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(22, 22, 26, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.browser-notice-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.browser-notice-actions .switch-btn,
+.browser-notice-actions .bg-btn {
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 9px 14px;
+}
+
+body.drop-active::after {
+    content: 'Drop an image to use it as the background';
+    position: fixed;
+    inset: 12px;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
     #controls {
         top: auto;
         bottom: 0;
@@ -417,6 +601,7 @@ canvas#gl {
         right: 0;
         width: 100%;
         max-height: 55vh;
+        max-height: 55dvh;
         border-radius: 20px 20px 0 0;
         transform: translateY(100%);
     }
@@ -425,16 +610,61 @@ canvas#gl {
         transform: translateY(0);
     }
 
+    .controls-footer {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    #controls label {
+        grid-template-columns: 128px minmax(0, 1fr) 38px;
+        min-height: 36px;
+        margin: 2px 0;
+    }
+
+    #controls input[type='range'] {
+        height: 28px;
+    }
+
+    #controls input[type='color'] {
+        width: 34px;
+        height: 34px;
+    }
+
+    #controls input[type='text'] {
+        font-size: 16px;
+    }
+
+    .close-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .chip {
+        padding: 8px 14px;
+        font-size: 12.5px;
+    }
+
+    .bg-btn {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
     .panel-toggle {
         top: auto;
         left: auto;
-        bottom: 68px;
-        right: 14px;
+        bottom: calc(68px + env(safe-area-inset-bottom));
+        right: calc(14px + env(safe-area-inset-right));
+        width: 44px;
+        height: 44px;
     }
 
     .bottom-bar {
-        bottom: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
         gap: 6px;
+    }
+
+    body.panel-open .bottom-bar {
+        opacity: 0;
+        visibility: hidden;
     }
 
     .bottom-note {
@@ -442,13 +672,14 @@ canvas#gl {
         padding: 6px 10px;
     }
 
-    .switch-btn {
+    .switch-btn,
+    .bottom-link {
         font-size: 11px;
         padding: 7px 12px;
     }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
     .bottom-note {
         display: none;
     }

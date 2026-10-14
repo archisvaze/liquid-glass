@@ -1,6 +1,6 @@
 # Liquid Glass
 
-An interactive demo of an **iOS 26–style Liquid Glass** effect for the web.
+An interactive demo of an **iOS 26 style Liquid Glass** effect for the web.
 
 ## Live Demo
 
@@ -31,23 +31,39 @@ An interactive demo of an **iOS 26–style Liquid Glass** effect for the web.
 
 ## Features
 
-- **Physics-Based Refraction** — configurable glass thickness, bezel width, and index of refraction (IOR)
-- **Specular Highlights** — adjustable opacity and saturation for realistic light reflections
-- **Inner & Outer Shadow** — color, blur, and spread controls
-- **Glass Tint** — any RGB tint with opacity control
-- **Background Picker** — choose from preset template images or paste a custom URL
-- **Draggable Glass** — click and drag the glass pane anywhere on screen
-- **Responsive** — desktop and mobile layouts
+- **Physics-Based Refraction**: configurable glass thickness, bezel width, and index of refraction (IOR)
+- **Specular Highlights**: adjustable opacity and saturation for realistic light reflections
+- **Inner & Outer Shadow**: color, blur, and spread controls
+- **Glass Tint**: any RGB tint with opacity control
+- **Shape Presets**: one tap for a card, pill, button or circle. Width and height go down to 60 x 40px
+- **Copy Code** (SVG version): copies the SVG filter and CSS for the exact glass on screen, ready to paste into your own page
+- **Share Links**: copy a link that opens the demo with your settings and background
+- **Saved Settings**: sliders are remembered between visits. **Defaults** puts them back
+- **Background Picker**: choose a preset image, paste an image URL, upload your own, or drop an image anywhere on the page
+- **Draggable Glass**: drag the pane anywhere on screen. It can't be lost off the edge, and a double-tap centers it
+- **Responsive**: side panel on desktop, bottom sheet on mobile that moves the glass out of the way while it's open
 
 ---
 
 ## Usage
 
-1. Clone the repo and open `index.html` in a browser, or visit the **Live Demo**.
-2. Use the control panel on the left to tweak every parameter in real time.
-3. Pick a background from the thumbnail grid or paste your own image URL.
-4. Drag the glass pane around to see refraction against different parts of the background.
-5. Hit **Switch to WebGL version** at the bottom if you're not on Chromium.
+1. Clone the repo and open `index.html` in a browser, or visit the **Live Demo**. No build step.
+2. Open the controls with the sliders button (top left on desktop, bottom right on mobile) and tweak every parameter in real time. `Esc` closes the panel.
+3. Pick a background from the thumbnail grid, paste an image URL, or upload your own.
+4. Drag the glass pane around to see refraction against different parts of the background. Double-tap it to re-center.
+5. Hit **Copy code** to take the effect into your own project, or **Share link** to send someone your exact setup.
+6. Hit **Switch to WebGL** at the bottom if you're not on Chromium. Other browsers also get a prompt on load.
+
+## Project Structure
+
+| File            | What it does                                                             |
+| --------------- | ------------------------------------------------------------------------ |
+| `index.html`    | SVG `feDisplacementMap` version                                          |
+| `webgl.html`    | Three.js shader version                                                  |
+| `ui.js`         | Shared panel, dragging, saved settings, share links and presets          |
+| `bg-picker.js`  | Shared background picker (presets, URL, upload, drag and drop)           |
+| `index.css`     | Shared styles                                                            |
+| `backgrounds/`  | Background images, with small previews in `backgrounds/thumbs/`          |
 
 ---
 
@@ -66,3 +82,9 @@ An interactive demo of an **iOS 26–style Liquid Glass** effect for the web.
 Inspired by Apple's **iOS 26 Liquid Glass** design language. Thanks to [chakachuk's CodePen demo](https://codepen.io/chakachuk/pen/QwbaYGO) for the original glass-distortion filter setup that kicked this off.
 
 ---
+
+## License
+
+[MIT](./LICENSE) © 2026 Archis Vaze. Free to use, modify and ship in personal or commercial projects. Just keep the copyright notice.
+
+Background photos in `backgrounds/` and the default Unsplash image are not covered by this license and remain under their original terms.

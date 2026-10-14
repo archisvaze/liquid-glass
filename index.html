@@ -3,9 +3,58 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Liquid Glass For the Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Liquid Glass for the Web: iOS 26 Glass Effect in CSS and SVG</title>
+    <meta name="description" content="Interactive iOS 26 Liquid Glass effect for the web with real refraction from SVG displacement maps. Tune thickness, bezel, IOR and tint, then copy the code." />
+    <link rel="canonical" href="https://liquid-glass-eta.vercel.app/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Archis Vaze" />
+    <meta name="theme-color" content="#16161a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Liquid Glass" />
+    <meta property="og:title" content="Liquid Glass for the Web" />
+    <meta property="og:description" content="iOS 26 style Liquid Glass with real refraction, built on SVG filters and backdrop-filter. Drag it, tune it, copy the code." />
+    <meta property="og:url" content="https://liquid-glass-eta.vercel.app/" />
+    <meta property="og:image" content="https://liquid-glass-eta.vercel.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A liquid glass pane refracting a living room photo" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preload" href="./backgrounds/default.avif" as="image" type="image/avif" />
     <link rel="stylesheet" href="./index.css" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Liquid Glass for the Web",
+            "url": "https://liquid-glass-eta.vercel.app/",
+            "description": "Interactive iOS 26 Liquid Glass effect for the web with real refraction from SVG displacement maps and backdrop-filter.",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires a Chromium browser. The WebGL version works in all modern browsers.",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "license": "https://opensource.org/licenses/MIT",
+            "sameAs": ["https://github.com/archisvaze/liquid-glass"],
+            "author": {
+                "@type": "Person",
+                "name": "Archis Vaze",
+                "url": "https://archisvaze.com",
+                "sameAs": ["https://github.com/archisvaze"]
+            }
+        }
+    </script>
+
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <style>
         body {
             display: flex;
@@ -18,7 +67,11 @@
 </head>
 
 <body>
-    <button class="panel-toggle" id="panel-toggle" aria-label="Toggle controls">
+    <h1 class="sr-only">Liquid Glass for the Web</h1>
+    <p class="sr-only">An interactive iOS 26 style Liquid Glass effect built with SVG displacement maps and backdrop-filter. Drag the glass, tune the refraction and copy the code into your own project.</p>
+    <noscript><div class="browser-notice">This demo needs JavaScript to run.</div></noscript>
+
+    <button class="panel-toggle" id="panel-toggle" aria-label="Open controls" aria-controls="controls" aria-expanded="false">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" />
@@ -33,10 +86,10 @@
         </svg>
     </button>
 
-    <div id="controls">
+    <div id="controls" role="region" aria-label="Controls" inert>
         <div class="controls-header">
             <span class="controls-title">Controls</span>
-            <button class="close-btn" id="panel-close" aria-label="Close">
+            <button class="close-btn" id="panel-close" aria-label="Close controls">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <line x1="6" y1="6" x2="18" y2="18" />
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -45,16 +98,22 @@
         </div>
         <div class="controls-scroll">
             <h2>Glass Shape</h2>
+            <div class="preset-row" role="group" aria-label="Shape presets">
+                <button type="button" class="chip" data-preset data-w="300" data-h="200" data-r="60">Card</button>
+                <button type="button" class="chip" data-preset data-w="280" data-h="80" data-r="40">Pill</button>
+                <button type="button" class="chip" data-preset data-w="140" data-h="52" data-r="26">Button</button>
+                <button type="button" class="chip" data-preset data-w="200" data-h="200" data-r="100">Circle</button>
+            </div>
             <label>Width
-                <input type="range" id="glass-width" min="200" max="700" value="300" />
+                <input type="range" id="glass-width" min="60" max="700" value="300" />
                 <span class="value-display" id="glass-width-val">300</span>
             </label>
             <label>Height
-                <input type="range" id="glass-height" min="200" max="800" value="200" />
+                <input type="range" id="glass-height" min="40" max="800" value="200" />
                 <span class="value-display" id="glass-height-val">200</span>
             </label>
             <label>Border Radius
-                <input type="range" id="border-radius" min="20" max="100" value="60" />
+                <input type="range" id="border-radius" min="20" max="350" value="60" />
                 <span class="value-display" id="border-radius-val">60</span>
             </label>
             <label style="display: none">Shape:
@@ -129,13 +188,27 @@
             <h2>Background</h2>
             <div id="bg-picker"></div>
         </div>
+        <div class="controls-footer">
+            <button type="button" class="bg-btn primary" id="copy-code" title="Copy the SVG filter and CSS for this glass">Copy code</button>
+            <button type="button" class="bg-btn" id="copy-link" title="Copy a link to these settings">Share link</button>
+            <button type="button" class="bg-btn" id="reset-settings" title="Reset all sliders to their defaults">Defaults</button>
+        </div>
     </div>
 
-    <div class="glassDiv" id="glass"></div>
+    <div class="glassDiv" id="glass" title="Drag to move, double-tap to re-center"></div>
+
+    <div class="browser-notice" id="browser-notice" hidden>
+        <p>This version uses SVG filters that only render in Chromium browsers (Chrome, Edge, Brave, Arc). In this browser the glass will look flat.</p>
+        <div class="browser-notice-actions">
+            <a class="switch-btn" href="./webgl.html">Open WebGL version</a>
+            <button type="button" class="bg-btn" id="browser-notice-close">Stay here</button>
+        </div>
+    </div>
 
     <div class="bottom-bar">
         <span class="bottom-note">⚠ SVG backdrop-filter is Chrome / Chromium only</span>
         <a class="switch-btn" href="./webgl.html">Switch to WebGL →</a>
+        <a class="bottom-link" href="https://github.com/archisvaze/liquid-glass" target="_blank" rel="noopener">GitHub</a>
     </div>
 
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
@@ -143,21 +216,7 @@
         <defs id="svg-defs"></defs>
     </svg>
 
-    <script>
-        (function () {
-            var panel = document.getElementById('controls');
-            var toggle = document.getElementById('panel-toggle');
-            var close = document.getElementById('panel-close');
-            toggle.addEventListener('click', function () {
-                panel.classList.add('open');
-                toggle.classList.add('hidden');
-            });
-            close.addEventListener('click', function () {
-                panel.classList.remove('open');
-                toggle.classList.remove('hidden');
-            });
-        })();
-    </script>
+    <script src="./ui.js"></script>
 
     <script>
         const SURFACE_FNS = {
@@ -295,6 +354,8 @@
 
         const glass = document.getElementById('glass');
 
+        let lastFilter = null;
+
         function rebuildFilter() {
             const w = glass.offsetWidth,
                 h = glass.offsetHeight;
@@ -308,10 +369,10 @@
             const blurAmt = +document.getElementById('blur-amount').value;
             const specOpacity = +document.getElementById('specular-opacity').value;
             const specSat = +document.getElementById('specular-saturation').value;
-            const radius = +document.getElementById('border-radius').value;
+            const radius = Math.floor(Math.min(+document.getElementById('border-radius').value, w / 2, h / 2));
 
             const heightFn = SURFACE_FNS[surfaceKey];
-            const clampedBezel = Math.min(bezelW, radius - 1, Math.min(w, h) / 2 - 1);
+            const clampedBezel = Math.max(1, Math.min(bezelW, radius - 1, Math.min(w, h) / 2 - 1));
 
             const profile = calculateRefractionProfile(glassThick, clampedBezel, heightFn, ior, 128);
             const maxDisp = Math.max(...Array.from(profile).map(Math.abs)) || 1;
@@ -319,23 +380,81 @@
             const specUrl = generateSpecularMap(w, h, radius, clampedBezel * 2.5);
             const scale = maxDisp * scaleRatio;
 
-            document.getElementById('svg-defs').innerHTML = `
-        <filter id="liquid-glass-filter" x="0%" y="0%" width="100%" height="100%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="${blurAmt}" result="blurred_source" />
-            <feImage href="${dispUrl}" x="0" y="0" width="${w}" height="${h}" result="disp_map" />
-            <feDisplacementMap in="blurred_source" in2="disp_map"
-                scale="${scale}" xChannelSelector="R" yChannelSelector="G"
-                result="displaced" />
-            <feColorMatrix in="displaced" type="saturate" values="${specSat}" result="displaced_sat" />
-            <feImage href="${specUrl}" x="0" y="0" width="${w}" height="${h}" result="spec_layer" />
-            <feComposite in="displaced_sat" in2="spec_layer" operator="in" result="spec_masked" />
-            <feComponentTransfer in="spec_layer" result="spec_faded">
-                <feFuncA type="linear" slope="${specOpacity}" />
-            </feComponentTransfer>
-            <feBlend in="spec_masked" in2="displaced" mode="normal" result="with_sat" />
-            <feBlend in="spec_faded" in2="with_sat" mode="normal" />
-        </filter>
-    `;
+            const markup = `<filter id="liquid-glass-filter" x="0%" y="0%" width="100%" height="100%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="${blurAmt}" result="blurred_source" />
+      <feImage href="${dispUrl}" x="0" y="0" width="${w}" height="${h}" result="disp_map" />
+      <feDisplacementMap in="blurred_source" in2="disp_map"
+        scale="${scale}" xChannelSelector="R" yChannelSelector="G"
+        result="displaced" />
+      <feColorMatrix in="displaced" type="saturate" values="${specSat}" result="displaced_sat" />
+      <feImage href="${specUrl}" x="0" y="0" width="${w}" height="${h}" result="spec_layer" />
+      <feComposite in="displaced_sat" in2="spec_layer" operator="in" result="spec_masked" />
+      <feComponentTransfer in="spec_layer" result="spec_faded">
+        <feFuncA type="linear" slope="${specOpacity}" />
+      </feComponentTransfer>
+      <feBlend in="spec_masked" in2="displaced" mode="normal" result="with_sat" />
+      <feBlend in="spec_faded" in2="with_sat" mode="normal" />
+    </filter>`;
+
+            document.getElementById('svg-defs').innerHTML = markup;
+            lastFilter = { markup, w, h, radius };
+        }
+
+        function buildExportCode() {
+            clearTimeout(timer);
+            rebuildFilter();
+            if (!lastFilter) return '';
+            const { markup, w, h, radius } = lastFilter;
+            const val = (id) => document.getElementById(id).value;
+            const tint = hexToRgb(val('tint-color'));
+            const tintOp = (+val('tint-opacity') / 100).toFixed(3);
+
+            return `<!-- Liquid Glass, https://liquid-glass-eta.vercel.app
+     Chromium only. Made for a ${w}x${h} box with ${radius}px radius, export again if you resize. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
+  color-interpolation-filters="sRGB">
+  <defs>
+    ${markup}
+  </defs>
+</svg>
+
+<div class="liquid-glass">
+  <!-- your content -->
+</div>
+
+<style>
+  .liquid-glass {
+    position: relative;
+    width: ${w}px;
+    height: ${h}px;
+    border-radius: ${radius}px;
+    isolation: isolate;
+    box-shadow: 0px 4px ${val('outer-shadow-blur')}px rgba(0, 0, 0, 0.18);
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    box-shadow: inset 0 0 ${val('shadow-blur')}px ${val('shadow-spread')}px ${val('shadow-color')};
+    background-color: rgba(${tint}, ${tintOp});
+    pointer-events: none;
+  }
+
+  .liquid-glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    backdrop-filter: url(#liquid-glass-filter);
+    -webkit-backdrop-filter: url(#liquid-glass-filter);
+    isolation: isolate;
+  }
+</style>
+`;
         }
 
         function hexToRgb(hex) {
@@ -433,34 +552,50 @@
             timer = setTimeout(rebuildFilter, 150);
         });
 
-        glass.style.left = innerWidth / 2 - 150 + 'px';
-        glass.style.top = innerHeight / 2 - 100 + 'px';
+        LiquidUI.init({
+            adapter: {
+                getRect: () => ({
+                    x: parseFloat(glass.style.left) || glass.offsetLeft,
+                    y: parseFloat(glass.style.top) || glass.offsetTop,
+                    w: glass.offsetWidth,
+                    h: glass.offsetHeight,
+                }),
+                setPos: (x, y) => {
+                    glass.style.left = x + 'px';
+                    glass.style.top = y + 'px';
+                },
+            },
+            dragHandle: glass,
+            controls: [...FILTER_CTRLS, ...CSS_CTRLS].map(([id]) => id).concat(['shadow-color', 'tint-color']),
+            sizeIds: { w: 'glass-width', h: 'glass-height', r: 'border-radius' },
+            storageKey: 'liquid-glass-settings-svg',
+            shareExtras: () => ({ bg: BgPicker.getShareUrl() }),
+        });
 
-        (function () {
-            let sx, sy;
-            glass.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                sx = e.clientX;
-                sy = e.clientY;
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', () => document.removeEventListener('pointermove', onMove), { once: true });
+        const copyCodeBtn = document.getElementById('copy-code');
+        copyCodeBtn.addEventListener('click', () => {
+            LiquidUI.copyText(buildExportCode()).then(
+                () => LiquidUI.flash(copyCodeBtn, 'Copied'),
+                () => LiquidUI.flash(copyCodeBtn, 'Copy failed')
+            );
+        });
+
+        if (!LiquidUI.isChromium()) {
+            const notice = document.getElementById('browser-notice');
+            notice.hidden = false;
+            document.getElementById('browser-notice-close').addEventListener('click', () => {
+                notice.hidden = true;
             });
-            function onMove(e) {
-                e.preventDefault();
-                glass.style.left = glass.offsetLeft + e.clientX - sx + 'px';
-                glass.style.top = glass.offsetTop + e.clientY - sy + 'px';
-                sx = e.clientX;
-                sy = e.clientY;
-            }
-        })();
+        }
     </script>
 
     <script src="./bg-picker.js"></script>
     <script>
         BgPicker.init({
-            defaultUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+            defaultUrl: './backgrounds/default.avif',
+            initialUrl: LiquidUI.sharedBg(),
             onApply: function (url) {
-                document.body.style.background = "url('" + url + "') center/cover no-repeat";
+                document.body.style.background = 'url(' + JSON.stringify(url) + ') center/cover no-repeat';
             },
         });
     </script>

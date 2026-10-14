@@ -3,17 +3,71 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
-    <title>Liquid Glass — WebGL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Liquid Glass WebGL: iOS 26 Glass Effect for Every Browser</title>
+    <meta name="description" content="Cross-browser iOS 26 Liquid Glass effect built with a Three.js shader. Real-time refraction, blur and specular highlights in Chrome, Safari and Firefox." />
+    <link rel="canonical" href="https://liquid-glass-eta.vercel.app/webgl.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Archis Vaze" />
+    <meta name="theme-color" content="#16161a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Liquid Glass" />
+    <meta property="og:title" content="Liquid Glass for the Web (WebGL)" />
+    <meta property="og:description" content="iOS 26 style Liquid Glass in a Three.js shader. Real-time refraction that works in every modern browser." />
+    <meta property="og:url" content="https://liquid-glass-eta.vercel.app/webgl.html" />
+    <meta property="og:image" content="https://liquid-glass-eta.vercel.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A liquid glass pane refracting a living room photo" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="preload" href="./backgrounds/default.avif" as="image" type="image/avif" />
     <link rel="stylesheet" href="./index.css" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Liquid Glass for the Web (WebGL)",
+            "url": "https://liquid-glass-eta.vercel.app/webgl.html",
+            "description": "Cross-browser iOS 26 Liquid Glass effect built with a Three.js shader, with real-time refraction, blur and specular highlights.",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires WebGL.",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "license": "https://opensource.org/licenses/MIT",
+            "sameAs": ["https://github.com/archisvaze/liquid-glass"],
+            "author": {
+                "@type": "Person",
+                "name": "Archis Vaze",
+                "url": "https://archisvaze.com",
+                "sameAs": ["https://github.com/archisvaze"]
+            }
+        }
+    </script>
+
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 
 <body>
+    <h1 class="sr-only">Liquid Glass for the Web, WebGL version</h1>
+    <p class="sr-only">An iOS 26 style Liquid Glass effect rendered with a Three.js shader. Drag the glass and tune refraction, blur, specular and tint in any modern browser.</p>
+    <noscript><div class="browser-notice">This demo needs JavaScript to run.</div></noscript>
+
     <div id="bg"></div>
     <canvas id="gl"></canvas>
-    <div id="dragger"></div>
+    <div id="dragger" title="Drag to move, double-tap to re-center"></div>
 
-    <button class="panel-toggle" id="panel-toggle" aria-label="Toggle controls">
+    <button class="panel-toggle" id="panel-toggle" aria-label="Open controls" aria-controls="controls" aria-expanded="false">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" />
@@ -28,10 +82,10 @@
         </svg>
     </button>
 
-    <div id="controls">
+    <div id="controls" role="region" aria-label="Controls" inert>
         <div class="controls-header">
             <span class="controls-title">Controls</span>
-            <button class="close-btn" id="panel-close" aria-label="Close">
+            <button class="close-btn" id="panel-close" aria-label="Close controls">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <line x1="6" y1="6" x2="18" y2="18" />
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -40,14 +94,20 @@
         </div>
         <div class="controls-scroll">
             <h2>Glass</h2>
+            <div class="preset-row" role="group" aria-label="Shape presets">
+                <button type="button" class="chip" data-preset data-w="300" data-h="200" data-r="60">Card</button>
+                <button type="button" class="chip" data-preset data-w="280" data-h="80" data-r="40">Pill</button>
+                <button type="button" class="chip" data-preset data-w="140" data-h="52" data-r="26">Button</button>
+                <button type="button" class="chip" data-preset data-w="200" data-h="200" data-r="100">Circle</button>
+            </div>
             <label>Width
-                <input type="range" id="gw" min="200" max="700" value="300" /><span class="vd"
+                <input type="range" id="gw" min="60" max="700" value="300" /><span class="vd"
                     id="gw-v">300</span></label>
             <label>Height
-                <input type="range" id="gh" min="200" max="800" value="200" /><span class="vd"
+                <input type="range" id="gh" min="40" max="800" value="200" /><span class="vd"
                     id="gh-v">200</span></label>
             <label>Radius
-                <input type="range" id="gr" min="4" max="100" value="60" /><span class="vd" id="gr-v">60</span></label>
+                <input type="range" id="gr" min="20" max="350" value="60" /><span class="vd" id="gr-v">60</span></label>
 
             <h2>Refraction</h2>
             <label>Thickness
@@ -77,28 +137,19 @@
             <h2>Background</h2>
             <div id="bg-picker"></div>
         </div>
+        <div class="controls-footer">
+            <button type="button" class="bg-btn primary" id="copy-link" title="Copy a link to these settings">Share link</button>
+            <button type="button" class="bg-btn" id="reset-settings" title="Reset all sliders to their defaults">Defaults</button>
+        </div>
     </div>
 
     <div class="bottom-bar">
-        <span class="bottom-note">WebGL — works in all browsers</span>
+        <span class="bottom-note">WebGL version, works in all browsers</span>
         <a class="switch-btn" href="./">← Switch to SVG version</a>
+        <a class="bottom-link" href="https://github.com/archisvaze/liquid-glass" target="_blank" rel="noopener">GitHub</a>
     </div>
 
-    <script>
-        (function () {
-            var panel = document.getElementById('controls');
-            var toggle = document.getElementById('panel-toggle');
-            var close = document.getElementById('panel-close');
-            toggle.addEventListener('click', function () {
-                panel.classList.add('open');
-                toggle.classList.add('hidden');
-            });
-            close.addEventListener('click', function () {
-                panel.classList.remove('open');
-                toggle.classList.remove('hidden');
-            });
-        })();
-    </script>
+    <script src="./ui.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -119,23 +170,33 @@
 
         const canvas = document.getElementById('gl');
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         const scene = new THREE.Scene();
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
         let bgTexture = null;
-        const defaultBgUrl = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop';
+        const defaultBgUrl = './backgrounds/default.avif';
 
         function loadBgTexture(url) {
-            new THREE.TextureLoader().load(url, (tex) => {
-                tex.minFilter = THREE.LinearFilter;
-                tex.magFilter = THREE.LinearFilter;
-                bgTexture = tex;
-                material.uniforms.uBgTex.value = tex;
-                material.uniforms.uBgAspect.value = tex.image.width / tex.image.height;
-                document.getElementById('bg').style.background = "url('" + url + "') center/cover no-repeat";
+            return new Promise((resolve, reject) => {
+                new THREE.TextureLoader().load(
+                    url,
+                    (tex) => {
+                        tex.minFilter = THREE.LinearFilter;
+                        tex.magFilter = THREE.LinearFilter;
+                        if (bgTexture) bgTexture.dispose();
+                        bgTexture = tex;
+                        material.uniforms.uBgTex.value = tex;
+                        material.uniforms.uBgAspect.value = tex.image.width / tex.image.height;
+                        document.getElementById('bg').style.background = 'url(' + JSON.stringify(url) + ') center/cover no-repeat';
+                        requestRender();
+                        resolve();
+                    },
+                    undefined,
+                    () => reject(new Error("Couldn't load that image into WebGL."))
+                );
             });
         }
 
@@ -299,12 +360,21 @@ void main() {
 
         scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
+        let renderQueued = false;
+        function requestRender() {
+            if (renderQueued) return;
+            renderQueued = true;
+            requestAnimationFrame(render);
+        }
+
         function render() {
+            renderQueued = false;
+            if (!bgTexture) return;
             const u = material.uniforms;
             u.uResolution.value.set(window.innerWidth, window.innerHeight);
             u.uGlassCenter.value.set(state.x, state.y);
             u.uGlassSize.value.set(state.gw, state.gh);
-            u.uRadius.value = state.gr;
+            u.uRadius.value = Math.min(state.gr, state.gw / 2, state.gh / 2);
             u.uBezel.value = state.bezel;
             u.uThickness.value = state.thick;
             u.uIOR.value = state.ior;
@@ -313,12 +383,12 @@ void main() {
             u.uTint.value = state.tint;
             u.uShadow.value = state.shadow;
             renderer.render(scene, camera);
-            requestAnimationFrame(render);
         }
-        render();
+        requestRender();
 
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
+            requestRender();
         });
 
         const dragger = document.getElementById('dragger');
@@ -330,25 +400,6 @@ void main() {
             dragger.style.borderRadius = state.gr + 'px';
         }
         syncDragger();
-
-        (function () {
-            let sx, sy;
-            dragger.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                sx = e.clientX;
-                sy = e.clientY;
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', () => document.removeEventListener('pointermove', onMove), { once: true });
-            });
-            function onMove(e) {
-                e.preventDefault();
-                state.x += e.clientX - sx;
-                state.y += e.clientY - sy;
-                sx = e.clientX;
-                sy = e.clientY;
-                syncDragger();
-            }
-        })();
 
         const CTRLS = [
             ['gw', 'gw', (v) => Math.round(v)],
@@ -369,7 +420,25 @@ void main() {
                 state[key] = key === 'tint' ? raw / 100 : raw;
                 document.getElementById(id + '-v').textContent = fmt(el.value);
                 syncDragger();
+                requestRender();
             });
+        });
+
+        LiquidUI.init({
+            adapter: {
+                getRect: () => ({ x: state.x - state.gw / 2, y: state.y - state.gh / 2, w: state.gw, h: state.gh }),
+                setPos: (x, y) => {
+                    state.x = x + state.gw / 2;
+                    state.y = y + state.gh / 2;
+                    syncDragger();
+                    requestRender();
+                },
+            },
+            dragHandle: dragger,
+            controls: CTRLS.map(([id]) => id),
+            sizeIds: { w: 'gw', h: 'gh', r: 'gr' },
+            storageKey: 'liquid-glass-settings-webgl',
+            shareExtras: () => ({ bg: BgPicker.getShareUrl() }),
         });
     </script>
 
@@ -377,8 +446,10 @@ void main() {
     <script>
         BgPicker.init({
             defaultUrl: defaultBgUrl,
+            initialUrl: LiquidUI.sharedBg(),
+            requireCors: true,
             onApply: function (url) {
-                loadBgTexture(url);
+                return loadBgTexture(url);
             },
         });
     </script>
