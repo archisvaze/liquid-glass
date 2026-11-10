@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Liquid Glass for the Web: iOS 26 Glass Effect in CSS and SVG</title>
     <meta name="description" content="Interactive iOS 26 Liquid Glass effect for the web with real refraction from SVG displacement maps. Tune thickness, bezel, IOR and tint, then copy the code." />
-    <link rel="canonical" href="https://liquid-glass-eta.vercel.app/" />
+    <link rel="canonical" href="https://liquidglass.archisvaze.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="author" content="Archis Vaze" />
     <meta name="theme-color" content="#16161a" />
@@ -15,8 +15,8 @@
     <meta property="og:site_name" content="Liquid Glass" />
     <meta property="og:title" content="Liquid Glass for the Web" />
     <meta property="og:description" content="iOS 26 style Liquid Glass with real refraction, built on SVG filters and backdrop-filter. Drag it, tune it, copy the code." />
-    <meta property="og:url" content="https://liquid-glass-eta.vercel.app/" />
-    <meta property="og:image" content="https://liquid-glass-eta.vercel.app/og-image.jpg" />
+    <meta property="og:url" content="https://liquidglass.archisvaze.com/" />
+    <meta property="og:image" content="https://liquidglass.archisvaze.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="A liquid glass pane refracting a living room photo" />
@@ -33,7 +33,7 @@
             "@context": "https://schema.org",
             "@type": "WebApplication",
             "name": "Liquid Glass for the Web",
-            "url": "https://liquid-glass-eta.vercel.app/",
+            "url": "https://liquidglass.archisvaze.com/",
             "description": "Interactive iOS 26 Liquid Glass effect for the web with real refraction from SVG displacement maps and backdrop-filter.",
             "applicationCategory": "DesignApplication",
             "operatingSystem": "Any",
@@ -409,7 +409,7 @@
             const tint = hexToRgb(val('tint-color'));
             const tintOp = (+val('tint-opacity') / 100).toFixed(3);
 
-            return `<!-- Liquid Glass, https://liquid-glass-eta.vercel.app
+            return `<!-- Liquid Glass, https://liquidglass.archisvaze.com
      Chromium only. Made for a ${w}x${h} box with ${radius}px radius, export again if you resize. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden"
   color-interpolation-filters="sRGB">

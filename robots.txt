@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://liquid-glass-eta.vercel.app/sitemap.xml
+Sitemap: https://liquidglass.archisvaze.com/sitemap.xml

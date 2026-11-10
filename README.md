@@ -4,7 +4,7 @@ An interactive demo of an **iOS 26 style Liquid Glass** effect for the web.
 
 ## Live Demo
 
-[**Try it out → liquid-glass-eta.vercel.app**](https://liquid-glass-eta.vercel.app/)
+[**Try it out → liquidglass.archisvaze.com**](https://liquidglass.archisvaze.com/)
 
 <img width="487" height="367" alt="Screenshot 2026-03-02 at 08 49 33" src="https://github.com/user-attachments/assets/77694823-f4ce-4731-963f-c8bb47c8d7c0" />
 

@@ -1,0 +1,10 @@
+{
+    "redirects": [
+        {
+            "source": "/:path*",
+            "has": [{ "type": "host", "value": "liquid-glass-eta.vercel.app" }],
+            "destination": "https://liquidglass.archisvaze.com/:path*",
+            "statusCode": 301
+        }
+    ]
+}
